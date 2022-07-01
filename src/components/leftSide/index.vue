@@ -9,7 +9,7 @@ import { ref, reactive, defineEmits, onMounted } from "vue";
 import mixin from "./mixin";
 import bus from "@/lib/bus";
 
-const { getFileToUrl } = mixin();
+const { getFileToUrl, subscribeDragEvent } = mixin();
 // 套打背图
 const background = ref<any>(null);
 
@@ -34,7 +34,7 @@ const clickAddBackgroundBtn = () => {
 const getFileToBackground = (event: any) => {
   getFileToUrl(event, (result: any, imgInfo: any) => {
     controller.value.app.renderer.resize(imgInfo.width, imgInfo.height);
-    const image = controller.value.image;
+    const image = controller.value.image();
     image.init(result, { zIndex: 0 });
     background.value = image;
 
@@ -45,7 +45,6 @@ const getFileToBackground = (event: any) => {
 // 恢复已经加载的元素
 const resetElementPool = () => {
   elementPool.value.forEach((element: any) => {
-    console.log(element);
     element.reset();
   });
 };
@@ -60,19 +59,67 @@ const clickAddImageBtn = () => {
 // 把上传的图片导入画布
 const getFileToImage = (event: any) => {
   getFileToUrl(event, (result: any) => {
-    const image = controller.value.image;
+    const image = controller.value.image();
     image.init(result, { zIndex: elementPool.value.length + 1 });
+
+    subscribeDragEvent(image);
     elementPool.value.push(image);
   });
 };
 
+//#endregion
+
+//region 文本
+const pendingText = ref<string>("测试文本,请删除");
+const pendingTextStyle = ref<string>(
+  JSON.stringify({
+    fontFamily: "微软雅黑",
+    fontSize: 36,
+    wordWrap: true,
+    wordWrapWidth: 440,
+    lineJoin: "round",
+  })
+);
+
+// 添加文本
+const addText = (event: any) => {
+  const text = controller.value.text();
+  text.init(pendingText.value, {
+    zIndex: elementPool.value.length + 1,
+    style: JSON.parse(pendingTextStyle.value),
+  });
+
+  subscribeDragEvent(text);
+  elementPool.value.push(text);
+};
+
+//#endregion
+
+//#region 导出套打图
+const output = () => {
+  // 移除背景
+  controller.value.app.stage.removeChild(background.value.sprite);
+
+  controller.value.app.render();
+  const dataURL = controller.value.app.view.toDataURL("image/png", 1);
+  const a = document.createElement("a");
+  a.href = dataURL;
+  a.download = "套打图.png";
+  a.click();
+  restore();
+};
+// 恢复到导出前的样子
+const restore = () => {
+  controller.value.app.stage.removeChildren();
+  controller.value.app.stage.addChild(background.value.sprite);
+  resetElementPool();
+};
 //#endregion
 </script>
 <template>
   <div id="leftSide" class="left-side">
     <div class="title">控制台</div>
     <div class="layers">
-      <div class="list"></div>
       <div class="btns">
         <el-button size="small" plain @click="clickAddBackgroundBtn"
           >设置背图</el-button
@@ -80,7 +127,20 @@ const getFileToImage = (event: any) => {
         <el-button size="small" plain @click="clickAddImageBtn"
           >添加图片</el-button
         >
-        <el-button size="small" plain>添加文字</el-button>
+        <el-input
+          v-model="pendingText"
+          :rows="2"
+          type="textarea"
+          placeholder="待添加的文本"
+        />
+        <el-input
+          v-model="pendingTextStyle"
+          :rows="8"
+          type="textarea"
+          placeholder="待添加的文本样式"
+        />
+
+        <el-button size="small" @click="addText" plain>添加文字</el-button>
         <el-button size="small" plain type="danger">删除</el-button>
         <input
           type="file"
@@ -97,9 +157,18 @@ const getFileToImage = (event: any) => {
           style="display: none"
         />
       </div>
+
+      <el-button size="small" @click="output" plain>导出结果</el-button>
+      <el-table :data="elementPool" style="width: 100%" max-height="250">
+        <el-table-column prop="type" label="类型" />
+        <el-table-column prop="id" label="ID号" />
+      </el-table>
     </div>
   </div>
 </template>
 <style lang="scss">
 @import "./index.scss";
+#leftSide {
+  padding: 10px;
+}
 </style>

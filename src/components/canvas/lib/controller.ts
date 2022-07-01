@@ -1,4 +1,10 @@
 import Image from "./image";
-export default (app: any) => {
-  return { app, image: new Image(app) };
+import Text from "./text";
+export default (app: any, layer: any) => {
+  return {
+    app,
+    layer,
+    image: () => new Image(app, layer),
+    text: () => new Text(app, layer),
+  };
 };

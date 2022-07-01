@@ -10,13 +10,16 @@ import bus from "@/lib/bus";
 import controller from "./lib/controller";
 
 import * as PIXI from "pixi.js";
+import { Layer } from "@pixi/layers";
+const layer = new Layer();
 
 const app = new PIXI.Application({ backgroundAlpha: 0 });
+app.stage.interactive = true;
 app.stage.sortableChildren = true;
+app.stage.addChild(layer);
 onMounted(() => {
   document.getElementById("canvas")?.appendChild(app.view);
-
-  bus.emit("initByCanvas", controller(app));
+  bus.emit("initByCanvas", controller(app, layer));
 });
 </script>
 <template>

@@ -1,11 +1,29 @@
 import * as PIXI from "pixi.js";
-export default class Image {
+export default class Text {
   sprite: any = {};
   app: any = {};
   layer: any = {};
-  url = "";
+  text = "";
   id = "";
-  type = "图片";
+  type = "文本";
+
+  style = {
+    fontFamily: "微软雅黑",
+    fontSize: 36,
+    fontStyle: "italic",
+    fontWeight: "bold",
+    fill: ["#ffffff", "#00ff99"], // gradient
+    stroke: "#4a1850",
+    strokeThickness: 5,
+    dropShadow: true,
+    dropShadowColor: "#000000",
+    dropShadowBlur: 4,
+    dropShadowAngle: Math.PI / 6,
+    dropShadowDistance: 6,
+    wordWrap: true,
+    wordWrapWidth: 440,
+    lineJoin: "round",
+  };
 
   // 生成随机id
   getRandomId() {
@@ -17,11 +35,14 @@ export default class Image {
     this.layer = layer;
   }
 
-  init(url: string, option: any) {
-    this.id = "image-" + this.getRandomId();
+  init(text: string, option: any) {
+    this.id = "text-" + this.getRandomId();
 
-    this.url = url;
-    this.sprite = PIXI.Sprite.from(url);
+    this.text = text;
+    this.sprite = new PIXI.Text(
+      text,
+      new PIXI.TextStyle(option?.style || this.style)
+    );
     this.sprite.anchor.set(0.5);
     this.sprite.x = option?.x || this.app.screen.width / 2;
     this.sprite.y = option?.y || this.app.screen.height / 2;
@@ -36,8 +57,6 @@ export default class Image {
   }
 
   reset() {
-    console.log("reset");
-    console.log(this.sprite);
     this.app.stage.addChild(this.sprite);
   }
 
