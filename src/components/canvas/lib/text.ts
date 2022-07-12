@@ -1,44 +1,45 @@
 import * as PIXI from "pixi.js";
-export default class Text {
-  sprite: any = {};
-  app: any = {};
-  layer: any = {};
+import Element from "./element";
+export default class Text extends Element {
   text = "";
-  id = "";
-  type = "文本";
-
   style = {
     fontFamily: "微软雅黑",
-    fontSize: 36,
-    fontStyle: "italic",
-    fontWeight: "bold",
-    fill: ["#ffffff", "#00ff99"], // gradient
-    stroke: "#4a1850",
-    strokeThickness: 5,
-    dropShadow: true,
-    dropShadowColor: "#000000",
-    dropShadowBlur: 4,
-    dropShadowAngle: Math.PI / 6,
-    dropShadowDistance: 6,
+    fontSize: 24,
+    breakWords: true,
     wordWrap: true,
-    wordWrapWidth: 440,
-    lineJoin: "round",
+    wordWrapWidth: 320,
+    align: "left",
   };
-
-  // 生成随机id
-  getRandomId() {
-    return (Math.random() + new Date().getTime()).toString(32).slice(0, 8);
-  }
+  type = "文本";
 
   constructor(app: any, layer: any) {
-    this.app = app;
-    this.layer = layer;
+    super(app, layer);
+  }
+
+  reset(scale = 1) {
+    const x = this.sprite.x * scale;
+    const y = this.sprite.y * scale;
+    this.style.fontSize = this.style.fontSize * scale;
+    this.style.wordWrapWidth = this.style.wordWrapWidth * scale;
+    this.sprite.destroy();
+    this.init(this.text, {
+      x,
+      y,
+      id: this.id,
+      zIndex: this.zIndex,
+      style: this.style,
+      dragEvent: this.dragEvent,
+    });
   }
 
   init(text: string, option: any) {
-    this.id = "text-" + this.getRandomId();
+    this.id = option?.id || "text-" + this.getRandomId();
 
     this.text = text;
+
+    this.zIndex = option?.zIndex || 0;
+    this.dragEvent = option?.dragEvent || null;
+
     this.sprite = new PIXI.Text(
       text,
       new PIXI.TextStyle(option?.style || this.style)
@@ -54,18 +55,8 @@ export default class Text {
     this.sprite.zIndex = option?.zIndex || this.sprite.zIndex;
 
     this.app.stage.addChild(this.sprite);
-  }
-
-  reset() {
-    this.app.stage.addChild(this.sprite);
-  }
-
-  // 重设大小坐标等
-  set(option: any) {
-    this.sprite.x = option?.x || this.sprite.x;
-    this.sprite.y = option?.y || this.sprite.y;
-    this.sprite.width = option?.width || this.sprite.width;
-    this.sprite.height = option?.height || this.sprite.height;
-    this.sprite.zIndex = option?.zIndex || this.sprite.zIndex;
+    if (this.dragEvent != null) {
+      this.dragEvent(this);
+    }
   }
 }
