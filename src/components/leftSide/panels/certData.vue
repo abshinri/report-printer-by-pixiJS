@@ -5,82 +5,172 @@ export default {
 };
 </script>
 <script setup lang="ts">
-import { ref, reactive, defineEmits, onMounted, inject } from "vue";
-import mixin from "../mixin";
+import {
+  ref,
+  reactive,
+  defineEmits,
+  onMounted,
+  inject,
+  watch,
+  nextTick,
+} from "vue";
+
+import mixin from "@/lib/mixin";
 import bus from "@/lib/bus";
 // 画布控制器
 const controller = ref<any>(null);
-
-// 初始化画布控制器
-bus.on("initByCanvas", (_controller) => {
-  controller.value = _controller;
-});
-
 // 元素池
 const elementPool = inject<any>("elementPool");
-const { addText } = mixin();
+// 当前选择的元素
+const currentElements = inject<any>("currentElements");
+
+// 是否需要注意清空的状态
+let noClean = false;
+bus.on("updateCurrentElements", () => {
+  noClean = true;
+  tableRef.value!.clearSelection();
+  tableRef.value!.toggleRowSelection(currentElements.value[0], true);
+  noClean = false;
+});
+
+const { activeElement, deactiveElement } = mixin();
 const certData = ref<any>([
   {
-    type: "文字",
+    type: "text",
     name: "证照名称",
-    egname: "certName",
+    egName: "certName",
     content: "测试BLAHBLAHBLAH目录",
   },
   {
-    type: "文字",
+    type: "text",
     name: "证照类型代码",
-    egname: "certCode",
+    egName: "certCode",
     content: "032123125123123124i",
   },
   {
-    type: "文字",
+    type: "text",
     name: "证照编号",
-    egname: "certNumber",
+    egName: "certNumber",
     content: "34123_231",
   },
   {
-    type: "文字",
+    type: "text",
     name: "证照标识",
-    egname: "certSign",
+    egName: "certSign",
     content: "1.2.156.3005.2.062301.1101101102.0624_001.001.U",
   },
 ]);
 
-const onAddText = (row: any) => {
-  addText(row.content, undefined, row.egname);
+// 初始化元素池,除了Sprite全部配置好
+const initElementPool = () => {
+  certData.value.forEach((item: any) => {
+    if (item.type === "text") {
+      elementPool.value.push(
+        controller.value.text().init(item.egName, {
+          type: "text",
+          text: item.content,
+          ...item,
+        })
+      );
+    }
+  });
 };
 
-const removeText = (row: any) => {
-  for (let i = 0; i < elementPool.value.length; i++) {
-    const element = elementPool.value[i];
-    if (element.id === row.egname) {
-      element.remove();
-      elementPool.value.splice(i, 1);
-      break;
-    }
+// 添加一条数据到画布上
+const onAddElement = (row: any) => {
+  tableRef.value!.clearSelection();
+  tableRef.value!.toggleRowSelection(row, true);
+  activeElement(row.id);
+  // currentElements.value = [row];
+};
+
+// 删除一条数据
+const onRemoveElement = (row: any) => {
+  tableRef.value!.clearSelection();
+  tableRef.value!.toggleRowSelection(row, true);
+  deactiveElement(row.id);
+  // currentElements.value = [row];
+};
+
+const tableRef = ref<any>(null);
+const tableSelection = ref<any[]>([]);
+const toggleSelection = (rows?: any[]) => {
+  if (rows) {
+    rows.forEach((row) => {
+      tableRef.value!.toggleRowSelection(row, undefined);
+    });
+  } else {
+    tableRef.value!.clearSelection();
   }
 };
+const handleSelectionChange = (val: any[]) => {
+  if (noClean) return;
+  if (val.length > 0) {
+    tableSelection.value = val;
+    currentElements.value = elementPool.value.filter((element: any) => {
+      return tableSelection.value.find(
+        (tableElement: any) => tableElement.egName === element.id
+      );
+    });
+  } else {
+    currentElements.value = [];
+  }
+
+  bus.emit("updateCurrentTextStyle");
+};
+
+// 导入选择的数据
+const importSelected = () => {
+  tableSelection.value.forEach((row) => {
+    if (row.sprite == null) {
+      onAddElement(row);
+    }
+  });
+};
+
+// 初始化画布控制器,初始化完成才执行下面的操作
+bus.on("initByCanvas", (_controller) => {
+  controller.value = _controller;
+
+  initElementPool();
+});
 </script>
 <template>
   <div id="certDataPanel" class="certData-panel">
     <h3>证照数据</h3>
+    <el-button link type="primary" size="small" @click="importSelected"
+      >导入选中数据</el-button
+    >
     <el-table
-      :data="certData"
+      ref="tableRef"
+      :data="elementPool"
       style="margin: 10px 0; width: 100%"
       size="small"
       max-height="600"
+      @selection-change="handleSelectionChange"
     >
+      <el-table-column type="selection" width="55" />
       <el-table-column prop="type" label="类型" width="50" />
       <el-table-column prop="name" label="字段名" width="80" />
-      <el-table-column prop="egname" label="英文名" width="80" />
+      <el-table-column prop="egName" label="英文名" width="80" />
       <el-table-column prop="content" label="内容预览" width="100" />
       <el-table-column label="操作" align="center">
         <template #default="{ row }">
           <div style="text-align: center">
-            <el-button link type="primary" size="small" @click="onAddText(row)"
+            <el-button
+              link
+              type="primary"
+              size="small"
+              @click="onAddElement(row)"
+              :disabled="row.sprite != null"
               >添加</el-button
             >
-            <el-button link type="danger" size="small" @click="removeText(row)"
+            <el-button
+              link
+              type="danger"
+              size="small"
+              @click="onRemoveElement(row)"
+              :disabled="row.sprite == null"
               >删除</el-button
             >
           </div>

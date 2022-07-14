@@ -13,7 +13,7 @@ import {
   inject,
   defineExpose,
 } from "vue";
-import mixin from "../mixin";
+import mixin from "@/lib/mixin";
 import bus from "@/lib/bus";
 
 // 套打背图
@@ -76,7 +76,7 @@ const getFileToBackground = (event: any) => {
       imgInfo.height + padding.top + padding.bottom
     );
     const image = controller.value.image();
-    image.init(result, { zIndex: 0 });
+    image.apply(result, { zIndex: 0 });
     background.value = image;
 
     resetElementPool();

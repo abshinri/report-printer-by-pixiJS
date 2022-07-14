@@ -4,8 +4,8 @@ export default class Image extends Element {
   url = "";
   type = "图片";
 
-  constructor(app: any, layer: any) {
-    super(app, layer);
+  constructor(app: any) {
+    super(app);
   }
 
   reset(scale = 1) {
@@ -14,19 +14,18 @@ export default class Image extends Element {
     const width = this.sprite.width * scale;
     const height = this.sprite.height * scale;
     this.sprite.destroy();
-    this.init(this.url, {
+    this.apply(this.url, {
       x,
       y,
       width,
       height,
       id: this.id,
       zIndex: this.zIndex,
-      style: this.style,
       dragEvent: this.dragEvent,
     });
   }
 
-  init(url: string, option: any) {
+  apply(url: string, option: any) {
     this.id = "image-" + this.getRandomId();
 
     this.url = url;

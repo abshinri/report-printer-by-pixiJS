@@ -6,7 +6,7 @@ export default {
 </script>
 <script setup lang="ts">
 import { ref, reactive, defineEmits, onMounted, computed, inject } from "vue";
-import mixin from "./mixin";
+import mixin from "@/lib/mixin";
 import bus from "@/lib/bus";
 import backgroundPanel from "./panels/background.vue";
 import certDataPanel from "./panels/certData.vue";
@@ -51,32 +51,6 @@ const getFileToImage = (event: any) => {
 
 //#endregion
 
-//region 文本
-const pendingText = ref<string>("测试文本,请删除");
-const pendingTextStyle = ref<string>(
-  JSON.stringify({
-    fontFamily: "微软雅黑",
-    fontSize: 36,
-    wordWrap: true,
-    wordWrapWidth: 440,
-    lineJoin: "round",
-  })
-);
-
-// 添加文本
-const addText = (event: any) => {
-  const text = controller.value.text();
-  text.init(pendingText.value, {
-    zIndex: elementPool.value.length + 1,
-    style: JSON.parse(pendingTextStyle.value),
-  });
-
-  subscribeDragEvent(text);
-  elementPool.value.push(text);
-};
-
-//#endregion
-
 //#region 导出套打图
 const output = () => {
   // 移除背景
@@ -109,7 +83,7 @@ const restore = () => {
     <certDataPanel style="margin-top: 10px" />
 
     <el-button @click="output" plain>导出结果</el-button>
-    <h3  style="margin-top: 10px">资源池</h3>
+    <h3 style="margin-top: 10px">资源池</h3>
     <el-table :data="elementPool" style="width: 100%" max-height="250">
       <el-table-column prop="type" label="类型" />
       <el-table-column prop="id" label="ID号" />
@@ -150,6 +124,9 @@ const restore = () => {
 <style lang="scss" scoped>
 @import "./index.scss";
 #leftSide {
+  height: 100vh;
+  overflow-y: hidden;
+  overflow-x: hidden;
   padding: 10px;
 }
 .title {

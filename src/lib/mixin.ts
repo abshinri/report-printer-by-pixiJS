@@ -6,7 +6,7 @@ export default function () {
   // 元素池
   const elementPool = inject<any>("elementPool");
   // 当前元素
-  const currentElement = inject<any>("currentElement");
+  const currentElements = inject<any>("currentElements");
   // 画布控制器
   const controller = ref<any>(null);
   // 初始化画布控制器
@@ -47,7 +47,9 @@ export default function () {
     this.scale.x *= 1.05;
     this.scale.y *= 1.05;
 
-    currentElement.value = element;
+    currentElements.value = [element];
+    bus.emit("updateCurrentElements");
+    bus.emit("updateCurrentTextStyle");
     app.stage.on("pointermove", onDragMove);
   }
 
@@ -67,26 +69,27 @@ export default function () {
     );
   }
 
-  const pendingTextTemp = "测试文本,请删除";
-
-  // 添加文本
-  const addText = (
-    pendingText: string = pendingTextTemp,
-    pendingTextStyle: any,
-    id?: string
-  ) => {
-    const text = controller.value.text();
-
-    text.init(pendingText, {
-      id: id || undefined,
-      zIndex: elementPool.value.length + 1,
-      style: pendingTextStyle,
-      dragEvent: subscribeDragEvent,
+  /** 激活元素*/
+  const activeElement = (id: string, option: any = {}) => {
+    elementPool.value.find((element: any, index: number) => {
+      if (element.id === id) {
+        element.apply({
+          id: id,
+          zIndex: index,
+          dragEvent: subscribeDragEvent,
+          ...option,
+        });
+      }
     });
+  };
 
-    elementPool.value.push(text);
-
-    currentElement.value = text;
+  /** 失活元素 */
+  const deactiveElement = (id: string) => {
+    elementPool.value.find((element: any) => {
+      if (element.id === id) {
+        element.remove();
+      }
+    });
   };
 
   // 注册点击事件
@@ -101,7 +104,8 @@ export default function () {
   };
 
   return {
-    addText,
+    activeElement,
+    deactiveElement,
     getFileToUrl,
     subscribeDragEvent,
   };

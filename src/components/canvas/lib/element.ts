@@ -1,20 +1,36 @@
-import * as PIXI from "pixi.js";
-export default class Element {
-  sprite: any = {};
-  app: any = {};
-  layer: any = {};
+interface LooseObject {
+  [key: string]: any;
+}
+// 元素池
+export default class Element implements LooseObject {
+  sprite: any = null;
+  app: any = null;
   id = "";
-  zIndex = 0;
-  dragEvent:any = null;
+  zIndex = NaN;
+  dragEvent: any = null;
+  type = "element";
 
   // 生成随机id
   getRandomId() {
     return (Math.random() + new Date().getTime()).toString(32).slice(0, 8);
   }
 
-  constructor(app: any, layer: any) {
+  constructor(app: any) {
     this.app = app;
-    this.layer = layer;
+  }
+
+  // 数据预转到资源池
+  init(id?: string, option?: any) {
+    this.id = id || "element-" + this.getRandomId();
+    // 动态添加option属性到this上
+    if (option) {
+      for (const key in option) {
+        if (option.hasOwnProperty(key)) {
+          (<any>this)[key] = option[key];
+        }
+      }
+    }
+    return this;
   }
 
   // 重设大小坐标等
@@ -28,5 +44,6 @@ export default class Element {
 
   remove() {
     this.sprite.destroy();
+    this.sprite = null;
   }
 }

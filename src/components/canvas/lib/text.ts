@@ -3,17 +3,26 @@ import Element from "./element";
 export default class Text extends Element {
   text = "";
   style = {
+    fill: "#000000",
+    fontWeight: "normal",
     fontFamily: "微软雅黑",
+    fontStyle: "normal",
     fontSize: 24,
+    textBaseline: "alphabetic",
+    lineHeight: "",
+    letterSpacing: 0,
+    leading: 0,
+    padding: 0,
     breakWords: true,
     wordWrap: true,
     wordWrapWidth: 320,
     align: "left",
   };
-  type = "文本";
+  type = "text";
+  typeCn = "文本";
 
-  constructor(app: any, layer: any) {
-    super(app, layer);
+  constructor(app: any) {
+    super(app);
   }
 
   reset(scale = 1) {
@@ -22,7 +31,7 @@ export default class Text extends Element {
     this.style.fontSize = this.style.fontSize * scale;
     this.style.wordWrapWidth = this.style.wordWrapWidth * scale;
     this.sprite.destroy();
-    this.init(this.text, {
+    this.apply({
       x,
       y,
       id: this.id,
@@ -32,16 +41,14 @@ export default class Text extends Element {
     });
   }
 
-  init(text: string, option: any) {
+  apply(option: any) {
     this.id = option?.id || "text-" + this.getRandomId();
-
-    this.text = text;
 
     this.zIndex = option?.zIndex || 0;
     this.dragEvent = option?.dragEvent || null;
 
     this.sprite = new PIXI.Text(
-      text,
+      this.text,
       new PIXI.TextStyle(option?.style || this.style)
     );
     this.sprite.anchor.set(0.5);
