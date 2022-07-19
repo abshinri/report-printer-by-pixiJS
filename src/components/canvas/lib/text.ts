@@ -26,6 +26,9 @@ export default class Text extends Element {
   }
 
   reset(scale = 1) {
+    if (!this.sprite) {
+      return;
+    }
     const x = this.sprite.x * scale;
     const y = this.sprite.y * scale;
     this.style.fontSize = this.style.fontSize * scale;

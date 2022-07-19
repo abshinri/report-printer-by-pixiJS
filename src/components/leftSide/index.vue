@@ -10,6 +10,7 @@ import mixin from "@/lib/mixin";
 import bus from "@/lib/bus";
 import backgroundPanel from "./panels/background.vue";
 import certDataPanel from "./panels/certData.vue";
+import { ElMessage } from "element-plus";
 
 // 套打背图
 const backgroundPanelRef = ref<any>(null);
@@ -53,18 +54,46 @@ const getFileToImage = (event: any) => {
 
 //#region 导出套打图
 const output = () => {
-  // 移除背景
-  controller.value.app.stage.removeChild(
-    backgroundPanelRef.value.background.sprite
-  );
+  if (backgroundPanelRef.value.background.sprite) {
+    // backgroundPanelRef.value.background.sprite.destroy();
+    // 移除背景;
+    controller.value.app.stage.removeChild(
+      backgroundPanelRef.value.background.sprite
+    );
+  }
 
   controller.value.app.render();
   const dataURL = controller.value.app.view.toDataURL("image/png", 1);
-  const a = document.createElement("a");
-  a.href = dataURL;
-  a.download = "套打图.png";
-  a.click();
+
   restore();
+  const newWindow = window.open();
+  if (newWindow) {
+    newWindow.document.write(
+      `<html><head><title>套打图</title>
+      <style>
+      @page {
+        margin: 0;
+      }
+      </style>
+        </head>
+        <body style="margin:0;padding:0;">
+          <img src="${dataURL}" style="width:100vw;height:auto;" />
+        </body>
+      </html>`
+    );
+    newWindow.document.close();
+    // 打印
+    newWindow.print();
+    newWindow.onafterprint = function () {
+      newWindow.close();
+    };
+  } else {
+    ElMessage.error("请允许弹窗打开");
+  }
+  // const a = document.createElement("a");
+  // a.href = dataURL;
+  // a.download = "套打图.png";
+  // a.click();
 };
 // 恢复到导出前的样子
 const restore = () => {

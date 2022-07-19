@@ -1,4 +1,3 @@
-import * as PIXI from "pixi.js";
 import { ref, inject } from "vue";
 import bus from "@/lib/bus";
 import { ElMessage } from "element-plus";
@@ -14,7 +13,23 @@ export default function () {
     controller.value = _controller;
   });
 
-  // 图片转为PIXI可用格式
+  /** 像素转为mm*/
+  let mmDiv: any = document.createElement("div");
+  mmDiv.id = "mm";
+  mmDiv.style.width = "1mm";
+  document.querySelector("body")?.appendChild(mmDiv);
+  // 原生方法获取浏览器对元素的计算值
+  let mmUnit: any = document.getElementById("mm")?.getBoundingClientRect();
+
+  const pxToMm = (px: number, float: number = 5) => {
+    return (px / mmUnit.width).toFixed(float);
+  };
+
+  const pxToCm = (px: number, float: number = 5) => {
+    return ((pxToMm(px) as any) / 10).toFixed(float);
+  };
+
+  /** 图片转为PIXI可用格式*/
   const getFileToUrl = (event: any, cb: any) => {
     const files = event.target.files;
     if (!files[0]) {
@@ -104,6 +119,8 @@ export default function () {
   };
 
   return {
+    pxToMm,
+    pxToCm,
     activeElement,
     deactiveElement,
     getFileToUrl,

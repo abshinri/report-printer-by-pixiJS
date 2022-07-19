@@ -28,7 +28,7 @@ bus.on("initByCanvas", (_controller) => {
   controller.value = _controller;
 });
 
-const { getFileToUrl } = mixin();
+const { getFileToUrl, pxToMm, pxToCm } = mixin();
 
 //#region 背景图交互
 const backgroudInputRef = ref<any>(null);
@@ -181,8 +181,8 @@ defineExpose({
       <div class="original">
         <div>原始分辨率</div>
         <div>
-          <span>宽:</span><span>{{ originSize.width }}</span> x <span>高:</span
-          ><span>{{ originSize.height }}</span>
+          <span>宽:</span><span>{{ pxToCm(originSize.width, 2) }}cm</span> x
+          <span>高:</span><span>{{ pxToCm(originSize.height, 2) }}cm</span>
         </div>
       </div>
       <div class="scale">
