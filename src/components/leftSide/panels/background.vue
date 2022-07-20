@@ -28,7 +28,7 @@ bus.on("initByCanvas", (_controller) => {
   controller.value = _controller;
 });
 
-const { getFileToUrl, pxToMm, pxToCm } = mixin();
+const { getFileToUrl, pxToMm, pxToCm, addAnchorPoint,addFixedPoint } = mixin();
 
 //#region 背景图交互
 const backgroudInputRef = ref<any>(null);
@@ -71,6 +71,9 @@ const getFileToBackground = (event: any) => {
     bgUrl.value = result;
     originSize.width = imgInfo.width;
     originSize.height = imgInfo.height;
+
+    // originSize.widthCm = pxToCm(imgInfo.width, 2);
+    // originSize.heightCm = pxToCm(imgInfo.height, 2);
     controller.value.app.renderer.resize(
       imgInfo.width + padding.left + padding.right,
       imgInfo.height + padding.top + padding.bottom
@@ -86,15 +89,15 @@ const getFileToBackground = (event: any) => {
 // 恢复已经加载的元素
 const resetElementPool = () => {
   elementPool.value.forEach((element: any) => {
-    element.reset(1);
+    element.reset({ scale: 1, adjust: { x: -adjust.x, y: -adjust.y } });
   });
 };
 //#endregion
 // 应用比例的更改
 const handleSizeChange = (scale?: number) => {
-  background.value.reset(scale || backgroudScale.value);
+  background.value.reset({ scale: scale || backgroudScale.value });
   elementPool.value.forEach((element: any) => {
-    element.reset(scale || backgroudScale.value);
+    element.reset({ scale: scale || backgroudScale.value });
   });
   controller.value.app.stage.position.set(padding.left, padding.top);
   controller.value.app.renderer.resize(
@@ -111,8 +114,18 @@ const handlePaddingChange = () => {
 const handleScaleChange = (current: number = 1, old: number = 1) => {
   handleSizeChange(current / old);
 };
+
+const adjust = reactive({
+  x: 0,
+  y: 0,
+});
+const handleAdjustChange = (current: number = 1, old: number = 1) => {
+  handleSizeChange(1);
+};
+
 defineExpose({
   background,
+  adjust,
 });
 </script>
 <template>
@@ -130,44 +143,6 @@ defineExpose({
         </div>
         <div>上传套打底图</div>
       </div>
-      <div v-else class="padding">
-        <el-input-number
-          @click.stop
-          class="top"
-          v-model="padding.top"
-          size="small"
-          :precision="0"
-          controls-position="right"
-          @change="handlePaddingChange"
-        />
-        <el-input-number
-          @click.stop
-          class="bottom"
-          v-model="padding.bottom"
-          size="small"
-          :precision="0"
-          controls-position="right"
-          @change="handlePaddingChange"
-        />
-        <el-input-number
-          @click.stop
-          class="left"
-          v-model="padding.left"
-          size="small"
-          :precision="0"
-          controls-position="right"
-          @change="handlePaddingChange"
-        />
-        <el-input-number
-          @click.stop
-          class="right"
-          v-model="padding.right"
-          size="small"
-          :precision="0"
-          controls-position="right"
-          @change="handlePaddingChange"
-        />
-      </div>
     </div>
     <input
       type="file"
@@ -176,13 +151,43 @@ defineExpose({
       @change="getFileToBackground"
       style="display: none"
     />
+
+    <el-button @click="addAnchorPoint" plain>导入定位点</el-button>
+    <el-button @click="addFixedPoint" plain>导入矫正点</el-button>
+    <!-- <h4>打印偏移校对</h4>
+    <div class="adjust">
+      <div>
+        <div class="label">X轴</div>
+        <div class="input">
+          <el-input-number
+            v-model="adjust.x"
+            :min="-originSize.widthCm"
+            :max="originSize.widthCm"
+            @change="handleAdjustChange"
+          ></el-input-number>
+          <span>cm</span>
+        </div>
+      </div>
+      <div>
+        <div class="label">Y轴</div>
+        <div class="input">
+          <el-input-number
+            v-model="adjust.y"
+            :min="-originSize.heightCm"
+            :max="originSize.heightCm"
+            @change="handleAdjustChange"
+          ></el-input-number>
+          <span>cm</span>
+        </div>
+      </div>
+    </div>
     <h4>画布信息</h4>
     <div class="resolution" v-if="background !== null">
       <div class="original">
         <div>原始分辨率</div>
         <div>
-          <span>宽:</span><span>{{ pxToCm(originSize.width, 2) }}cm</span> x
-          <span>高:</span><span>{{ pxToCm(originSize.height, 2) }}cm</span>
+          <span>宽:</span><span>{{ originSize.widthCm }}cm</span> x
+          <span>高:</span><span>{{ originSize.heightCm }}cm</span>
         </div>
       </div>
       <div class="scale">
@@ -207,7 +212,7 @@ defineExpose({
         </div>
       </div>
     </div>
-    <div v-else>未知</div>
+    <div v-else>未知</div> -->
   </div>
 </template>
 <style lang="scss" scoped>
@@ -257,6 +262,7 @@ defineExpose({
       }
     }
   }
+  .adjust,
   .resolution {
     display: flex;
     justify-content: space-between;

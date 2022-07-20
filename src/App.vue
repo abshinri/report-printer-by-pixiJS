@@ -10,6 +10,15 @@ provide("elementPool", elementPool);
 // 当前的元素的配置,多个元素则为默认配置
 const currentElements = ref<any>([]);
 provide("currentElements", currentElements);
+// 报告打印矫正参数
+const adjustPointsGroup = ref<any>({
+  anchorPoints: { a: null, b: null },
+  fixedPoints: { a: null, b: null },
+  x: 0,
+  y: 0,
+  scale: 1,
+});
+provide("adjustPointsGroup", adjustPointsGroup);
 </script>
 
 <template>

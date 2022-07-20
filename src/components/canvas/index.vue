@@ -28,10 +28,11 @@ onMounted(() => {
 <style lang="scss">
 .canvas-wrapper {
   position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
+  // width: 100%;
+  // height: 100vh;
+  // overflow: hidden;
+  overflow: auto;
+  // display: flex;
   justify-content: center;
   align-items: center;
   .hint {
@@ -52,8 +53,8 @@ onMounted(() => {
     border: 1px solid #ccc;
     width: auto;
     height: auto;
-    max-width: 100%;
-    max-height: 100vh;
+    // max-width: 100%;
+    // max-height: 100vh;
   }
 }
 </style>

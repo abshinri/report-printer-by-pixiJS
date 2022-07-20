@@ -8,11 +8,11 @@ export default class Image extends Element {
     super(app);
   }
 
-  reset(scale = 1) {
-    const x = this.sprite.x * scale;
-    const y = this.sprite.y * scale;
-    const width = this.sprite.width * scale;
-    const height = this.sprite.height * scale;
+  reset(option: any) {
+    const x = (this.sprite.x + (option?.adjust?.x ?? 0)) * (option?.scale ?? 1);
+    const y = (this.sprite.y + (option?.adjust?.y ?? 0)) * (option?.scale ?? 1);
+    const width = this.sprite.width * (option.scale ?? 1);
+    const height = this.sprite.height * (option.scale ?? 1);
     this.sprite.destroy();
     this.apply(this.url, {
       x,

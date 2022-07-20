@@ -25,14 +25,14 @@ export default class Text extends Element {
     super(app);
   }
 
-  reset(scale = 1) {
+  reset(option: any) {
     if (!this.sprite) {
       return;
     }
-    const x = this.sprite.x * scale;
-    const y = this.sprite.y * scale;
-    this.style.fontSize = this.style.fontSize * scale;
-    this.style.wordWrapWidth = this.style.wordWrapWidth * scale;
+    const x = (this.sprite.x + (option?.adjust?.x ?? 0)) * (option?.scale ?? 1);
+    const y = (this.sprite.y + (option?.adjust?.y ?? 0)) * (option?.scale ?? 1);
+    this.style.fontSize = this.style.fontSize * (option?.scale ?? 1);
+    this.style.wordWrapWidth = this.style.wordWrapWidth * (option?.scale ?? 1);
     this.sprite.destroy();
     this.apply({
       x,
@@ -41,6 +41,7 @@ export default class Text extends Element {
       zIndex: this.zIndex,
       style: this.style,
       dragEvent: this.dragEvent,
+      ...option,
     });
   }
 

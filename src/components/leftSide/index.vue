@@ -6,6 +6,7 @@ export default {
 </script>
 <script setup lang="ts">
 import { ref, reactive, defineEmits, onMounted, computed, inject } from "vue";
+import * as PIXI from "pixi.js";
 import mixin from "@/lib/mixin";
 import bus from "@/lib/bus";
 import backgroundPanel from "./panels/background.vue";
@@ -18,13 +19,14 @@ const backgroundPanelRef = ref<any>(null);
 const controller = ref<any>(null);
 // 元素池
 const elementPool = inject<any>("elementPool");
+const elementContainer = new PIXI.Container();
 
 // 初始化画布控制器
 bus.on("initByCanvas", (_controller) => {
   controller.value = _controller;
 });
 
-const { getFileToUrl, subscribeDragEvent } = mixin();
+const { getFileToUrl, subscribeDragEvent, getAdjustParam } = mixin();
 
 // 恢复已经加载的元素
 const resetElementPool = () => {
@@ -54,13 +56,41 @@ const getFileToImage = (event: any) => {
 
 //#region 导出套打图
 const output = () => {
-  if (backgroundPanelRef.value.background.sprite) {
+  console.log(controller.value.app.stage);
+
+  const adjustParam = getAdjustParam(false);
+  console.log(adjustParam);
+  // controller.value.app.stage.removeChildren();
+  if (backgroundPanelRef.value.background?.sprite) {
     // backgroundPanelRef.value.background.sprite.destroy();
     // 移除背景;
     controller.value.app.stage.removeChild(
-      backgroundPanelRef.value.background.sprite
+      backgroundPanelRef.value.background?.sprite
     );
   }
+
+  // elementPool.value.forEach((element: any) => {
+  //   if (!element.sprite) {
+  //     return;
+  //   }
+  //   elementContainer.addChild(element.sprite);
+
+  //   // element.reset({
+  //   //   x: element.sprite.x + adjustParam.x,
+  //   //   y: element.sprite.y + adjustParam.y,
+  //   //   scale: adjustParam.scale,
+  //   // });
+  // });
+  controller.value.app.stage.x = controller.value.app.stage.x - adjustParam.x;
+  controller.value.app.stage.y = controller.value.app.stage.y - adjustParam.y;
+  controller.value.app.stage.scale.x = adjustParam.scale;
+  controller.value.app.stage.scale.y = adjustParam.scale;
+
+  console.log(controller.value.app.stage);
+  // controller.value.app.stage.children.forEach((child: any) => {
+  //   child.scale = adjustParam.scale;
+  //   child.position.set(child.x + adjustParam.x, child.y + adjustParam.y);
+  // });
 
   controller.value.app.render();
   const dataURL = controller.value.app.view.toDataURL("image/png", 1);
@@ -97,11 +127,14 @@ const output = () => {
 };
 // 恢复到导出前的样子
 const restore = () => {
-  controller.value.app.stage.removeChildren();
-  controller.value.app.stage.addChild(
-    backgroundPanelRef.value.background.sprite
-  );
-  resetElementPool();
+  // controller.value.app.stage.removeChildren();
+  if (backgroundPanelRef.value.background?.sprite) {
+    controller.value.app.stage.addChild(
+      backgroundPanelRef.value.background?.sprite
+    );
+  }
+
+  // resetElementPool();
 };
 //#endregion
 </script>
