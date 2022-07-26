@@ -9,8 +9,8 @@ export default function () {
   const elementPool = inject<any>("elementPool");
   // 当前元素
   const currentElements = inject<any>("currentElements");
-  // 矫正参数
-  const adjustPointsGroup = inject<any>("adjustPointsGroup");
+  // 打印参数
+  const printingParameters = inject<any>("printingParameters");
   // 画布控制器
   const controller = ref<any>(null);
   // 初始化画布控制器
@@ -103,6 +103,8 @@ export default function () {
           id: id,
           zIndex: index,
           dragEvent: subscribeDragEvent,
+          
+          container: controller.value.containers.content,
           ...option,
         });
       }
@@ -183,8 +185,8 @@ export default function () {
       "red"
     );
     controller.value.app.stage.addChild(anchorPoint_b);
-    adjustPointsGroup.value.anchorPoints.a = anchorPoint_a;
-    adjustPointsGroup.value.anchorPoints.b = anchorPoint_b;
+    printingParameters.value.anchorPoints.a = anchorPoint_a;
+    printingParameters.value.anchorPoints.b = anchorPoint_b;
   };
 
   //  增加矫正锚点
@@ -201,18 +203,18 @@ export default function () {
       "green"
     );
     controller.value.app.stage.addChild(anchorPoint_b);
-    adjustPointsGroup.value.fixedPoints.a = anchorPoint_a;
-    adjustPointsGroup.value.fixedPoints.b = anchorPoint_b;
+    printingParameters.value.fixedPoints.a = anchorPoint_a;
+    printingParameters.value.fixedPoints.b = anchorPoint_b;
   };
 
   // 计算矫正参数
   const getAdjustParam = (removePoints: boolean = false) => {
     if (
       !(
-        adjustPointsGroup.value.anchorPoints.a &&
-        adjustPointsGroup.value.anchorPoints.b &&
-        adjustPointsGroup.value.fixedPoints.a &&
-        adjustPointsGroup.value.fixedPoints.b
+        printingParameters.value.anchorPoints.a &&
+        printingParameters.value.anchorPoints.b &&
+        printingParameters.value.fixedPoints.a &&
+        printingParameters.value.fixedPoints.b
       )
     ) {
       return {
@@ -224,54 +226,54 @@ export default function () {
       };
     }
     const rectOnCanvasWidth = Math.abs(
-      adjustPointsGroup.value.anchorPoints.a.x -
-        adjustPointsGroup.value.anchorPoints.b.x
+      printingParameters.value.anchorPoints.a.x -
+        printingParameters.value.anchorPoints.b.x
     );
     const rectOnCanvasHeight = Math.abs(
-      adjustPointsGroup.value.anchorPoints.a.y -
-        adjustPointsGroup.value.anchorPoints.b.y
+      printingParameters.value.anchorPoints.a.y -
+        printingParameters.value.anchorPoints.b.y
     );
     const rectOnCanvasSize = rectOnCanvasWidth * rectOnCanvasHeight;
     const rectOnPrintWidth = Math.abs(
-      adjustPointsGroup.value.fixedPoints.a.x -
-        adjustPointsGroup.value.fixedPoints.b.x
+      printingParameters.value.fixedPoints.a.x -
+        printingParameters.value.fixedPoints.b.x
     );
     const rectOnPrintHeight = Math.abs(
-      adjustPointsGroup.value.fixedPoints.a.y -
-        adjustPointsGroup.value.fixedPoints.b.y
+      printingParameters.value.fixedPoints.a.y -
+        printingParameters.value.fixedPoints.b.y
     );
     const rectOnPrintSize = rectOnPrintWidth * rectOnPrintHeight;
     const result = {
       x:
-        adjustPointsGroup.value.fixedPoints.a.x -
-        adjustPointsGroup.value.anchorPoints.a.x,
+        printingParameters.value.fixedPoints.a.x -
+        printingParameters.value.anchorPoints.a.x,
       y:
-        adjustPointsGroup.value.fixedPoints.a.y -
-        adjustPointsGroup.value.anchorPoints.a.y,
+        printingParameters.value.fixedPoints.a.y -
+        printingParameters.value.anchorPoints.a.y,
       scale: rectOnPrintSize / rectOnCanvasSize,
     };
-    adjustPointsGroup.value = {
-      ...adjustPointsGroup.value,
+    printingParameters.value = {
+      ...printingParameters.value,
       ...result,
     };
 
     // 清除锚点精灵图
     if (removePoints) {
       controller.value.app.stage.removeChild(
-        adjustPointsGroup.value.anchorPoints.a
+        printingParameters.value.anchorPoints.a
       );
       controller.value.app.stage.removeChild(
-        adjustPointsGroup.value.anchorPoints.b
+        printingParameters.value.anchorPoints.b
       );
       controller.value.app.stage.removeChild(
-        adjustPointsGroup.value.fixedPoints.a
+        printingParameters.value.fixedPoints.a
       );
       controller.value.app.stage.removeChild(
-        adjustPointsGroup.value.fixedPoints.b
+        printingParameters.value.fixedPoints.b
       );
     }
 
-    return adjustPointsGroup.value;
+    return printingParameters.value;
   };
 
   return {

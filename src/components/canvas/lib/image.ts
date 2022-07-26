@@ -4,8 +4,8 @@ export default class Image extends Element {
   url = "";
   type = "图片";
 
-  constructor(app: any) {
-    super(app);
+  constructor(app: any, containers: any) {
+    super(app, containers);
   }
 
   reset(option: any) {
@@ -44,7 +44,9 @@ export default class Image extends Element {
     this.sprite.height = option?.height || this.sprite.height;
     this.sprite.zIndex = option?.zIndex || this.sprite.zIndex;
 
-    this.app.stage.addChild(this.sprite);
+    option?.container
+      ? option?.container.addChild(this.sprite)
+      : this.containers.content.addChild(this.sprite);
     if (this.dragEvent != null) {
       this.dragEvent(this);
     }

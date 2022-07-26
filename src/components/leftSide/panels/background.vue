@@ -23,12 +23,15 @@ const controller = ref<any>(null);
 // 元素池
 const elementPool = inject<any>("elementPool");
 
+// 打印参数
+const printingParameters = inject<any>("printingParameters");
+
 // 初始化画布控制器
 bus.on("initByCanvas", (_controller) => {
   controller.value = _controller;
 });
 
-const { getFileToUrl, pxToMm, pxToCm, addAnchorPoint,addFixedPoint } = mixin();
+const { getFileToUrl, pxToMm, pxToCm, addAnchorPoint, addFixedPoint } = mixin();
 
 //#region 背景图交互
 const backgroudInputRef = ref<any>(null);
@@ -72,17 +75,39 @@ const getFileToBackground = (event: any) => {
     originSize.width = imgInfo.width;
     originSize.height = imgInfo.height;
 
+    printingParameters.value = {
+      anchorPoints: { a: null, b: null },
+      fixedPoints: { a: null, b: null },
+      x: 0,
+      y: 0,
+      width: imgInfo.width,
+      height: imgInfo.height,
+      scale: 1,
+    };
+
     // originSize.widthCm = pxToCm(imgInfo.width, 2);
     // originSize.heightCm = pxToCm(imgInfo.height, 2);
-    controller.value.app.renderer.resize(
-      imgInfo.width + padding.left + padding.right,
-      imgInfo.height + padding.top + padding.bottom
-    );
+    // controller.value.app.renderer.resize(
+    //   imgInfo.width + padding.left + padding.right,
+    //   imgInfo.height + padding.top + padding.bottom
+    // );
+
+    controller.value.containers.background.x = 0;
+    controller.value.containers.background.y = 0;
+    controller.value.containers.background.width = imgInfo.width;
+    controller.value.containers.background.height = imgInfo.height;
+    // controller.value.containers.printer.width = imgInfo.width;
+    // controller.value.containers.printer.height = imgInfo.height;
+
     const image = controller.value.image();
-    image.apply(result, { zIndex: 0 });
+    image.apply(result, {
+      container: controller.value.containers.background,
+    });
     background.value = image;
 
     resetElementPool();
+
+    console.log(controller.value);
   });
 };
 

@@ -5,6 +5,7 @@ interface LooseObject {
 export default class Element implements LooseObject {
   sprite: any = null;
   app: any = null;
+  containers: any = null;
   id = "";
   zIndex = NaN;
   dragEvent: any = null;
@@ -15,8 +16,9 @@ export default class Element implements LooseObject {
     return (Math.random() + new Date().getTime()).toString(32).slice(0, 8);
   }
 
-  constructor(app: any) {
+  constructor(app: any, containers: any) {
     this.app = app;
+    this.containers = containers;
   }
 
   // 数据预转到资源池

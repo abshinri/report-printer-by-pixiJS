@@ -19,8 +19,9 @@ const backgroundPanelRef = ref<any>(null);
 const controller = ref<any>(null);
 // 元素池
 const elementPool = inject<any>("elementPool");
-const elementContainer = new PIXI.Container();
 
+// 打印参数
+const printingParameters = inject<any>("printingParameters");
 // 初始化画布控制器
 bus.on("initByCanvas", (_controller) => {
   controller.value = _controller;
@@ -56,18 +57,14 @@ const getFileToImage = (event: any) => {
 
 //#region 导出套打图
 const output = () => {
-  console.log(controller.value.app.stage);
-
-  const adjustParam = getAdjustParam(false);
-  console.log(adjustParam);
-  // controller.value.app.stage.removeChildren();
-  if (backgroundPanelRef.value.background?.sprite) {
-    // backgroundPanelRef.value.background.sprite.destroy();
-    // 移除背景;
-    controller.value.app.stage.removeChild(
-      backgroundPanelRef.value.background?.sprite
-    );
-  }
+  // const adjustParam = getAdjustParam(false);
+  // console.log(adjustParam);
+  // // controller.value.app.stage.removeChildren();
+  // if (backgroundPanelRef.value.background?.sprite) {
+  //   // backgroundPanelRef.value.background.sprite.destroy();
+  //   // 移除背景;
+  //   backgroundPanelRef.value.background.sprite.alpha = 0.1;
+  // }
 
   // elementPool.value.forEach((element: any) => {
   //   if (!element.sprite) {
@@ -81,49 +78,73 @@ const output = () => {
   //   //   scale: adjustParam.scale,
   //   // });
   // });
-  controller.value.app.stage.x = controller.value.app.stage.x - adjustParam.x;
-  controller.value.app.stage.y = controller.value.app.stage.y - adjustParam.y;
-  controller.value.app.stage.scale.x = adjustParam.scale;
-  controller.value.app.stage.scale.y = adjustParam.scale;
 
-  console.log(controller.value.app.stage);
+  // controller.value.containers.content.x =
+  //   controller.value.containers.content.x - adjustParam.x;
+  // controller.value.containers.content.y =
+  //   controller.value.containers.content.y - adjustParam.y;
+  // controller.value.containers.content.scale.x = adjustParam.scale;
+  // controller.value.containers.content.scale.y = adjustParam.scale;
+
+  // console.log(controller.value.app.stage);
   // controller.value.app.stage.children.forEach((child: any) => {
   //   child.scale = adjustParam.scale;
   //   child.position.set(child.x + adjustParam.x, child.y + adjustParam.y);
   // });
 
-  controller.value.app.render();
-  const dataURL = controller.value.app.view.toDataURL("image/png", 1);
+  // controller.value.app.render();
 
-  restore();
-  const newWindow = window.open();
-  if (newWindow) {
-    newWindow.document.write(
-      `<html><head><title>套打图</title>
-      <style>
-      @page {
-        margin: 0;
-      }
-      </style>
-        </head>
-        <body style="margin:0;padding:0;">
-          <img src="${dataURL}" style="width:100vw;height:auto;" />
-        </body>
-      </html>`
+  console.log(controller.value);
+  const graphics = new PIXI.Graphics()
+    .beginFill(0xffffff, 1)
+    .drawRect(
+      0,
+      0,
+      controller.value.containers.background.width,
+      controller.value.containers.background.height
     );
-    newWindow.document.close();
-    // 打印
-    newWindow.print();
-    newWindow.onafterprint = function () {
-      newWindow.close();
-    };
-  } else {
-    ElMessage.error("请允许弹窗打开");
-  }
-  // const a = document.createElement("a");
-  // a.href = dataURL;
-  // a.download = "套打图.png";
-  // a.click();
+  const tempContainer = new PIXI.Container();
+  tempContainer.width = printingParameters.value.width;
+  tempContainer.height = printingParameters.value.height;
+
+  tempContainer.addChild(graphics);
+  tempContainer.addChild(controller.value.containers.content);
+  // controller.value.containers.background.removeChildren()
+  const dataURL = controller.value.app.renderer.plugins.extract
+    .canvas(tempContainer, "image/jpeg", 1)
+    .toDataURL();
+
+  // controller.value.containers.content.renderCanvas ()
+
+  // restore();
+  // const newWindow = window.open();
+  // if (newWindow) {
+  //   newWindow.document.write(
+  //     `<html><head><title>套打图</title>
+  //     <style>
+  //     @page {
+  //       margin: 0;
+  //     }
+  //     </style>
+  //       </head>
+  //       <body style="margin:0;padding:0;">
+  //         <img src="${dataURL}" style="width:100vw;height:auto;" />
+  //       </body>
+  //     </html>`
+  //   );
+  //   newWindow.document.close();
+  //   // 打印
+  //   newWindow.print();
+  //   newWindow.onafterprint = function () {
+  //     newWindow.close();
+  //   };
+  // } else {
+  //   ElMessage.error("请允许弹窗打开");
+  // }
+  const a = document.createElement("a");
+  a.href = dataURL;
+  a.download = "套打图.jpg";
+  a.click();
 };
 // 恢复到导出前的样子
 const restore = () => {

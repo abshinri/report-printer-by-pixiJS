@@ -11,14 +11,16 @@ provide("elementPool", elementPool);
 const currentElements = ref<any>([]);
 provide("currentElements", currentElements);
 // 报告打印矫正参数
-const adjustPointsGroup = ref<any>({
+const printingParameters = ref<any>({
   anchorPoints: { a: null, b: null },
   fixedPoints: { a: null, b: null },
   x: 0,
   y: 0,
+  width: 0,
+  height: 0,
   scale: 1,
 });
-provide("adjustPointsGroup", adjustPointsGroup);
+provide("printingParameters", printingParameters);
 </script>
 
 <template>
