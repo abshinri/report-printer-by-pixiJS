@@ -28,11 +28,11 @@ onMounted(() => {
 <style lang="scss">
 .canvas-wrapper {
   position: relative;
-  // width: 100%;
-  // height: 100vh;
-  // overflow: hidden;
-  overflow: auto;
-  // display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  // overflow: auto;
+  display: flex;
   justify-content: center;
   align-items: center;
   .hint {
@@ -48,11 +48,12 @@ onMounted(() => {
     line-height: 100vh;
     font-size: 20px;
   }
-  canvas {
+  #canvas {
+    background: #38404e url(../../assets/tile.png) 56px 56px;
     text-align: center;
     border: 1px solid #ccc;
-    width: auto;
-    height: auto;
+    width: 100%;
+    height: 100%;
     // max-width: 100%;
     // max-height: 100vh;
   }

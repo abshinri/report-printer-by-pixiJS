@@ -134,7 +134,7 @@ const restore = () => {
     );
   }
 
-  // resetElementPool();
+  resetElementPool();
 };
 //#endregion
 </script>
