@@ -16,6 +16,8 @@ import {
 import mixin from "@/lib/mixin";
 import bus from "@/lib/bus";
 
+// 矫正参数
+const adjustPointsGroup = inject<any>("adjustPointsGroup");
 // 套打背图
 const background = ref<any>(null);
 // 画布控制器
@@ -28,7 +30,8 @@ bus.on("initByCanvas", (_controller) => {
   controller.value = _controller;
 });
 
-const { getFileToUrl, pxToMm, pxToCm, addAnchorPoint,addFixedPoint } = mixin();
+const { getFileToUrl, addAnchorPoint, addFixedPoint, cleanFixedPoint } =
+  mixin();
 
 //#region 背景图交互
 const backgroudInputRef = ref<any>(null);
@@ -83,6 +86,7 @@ const getFileToBackground = (event: any) => {
     background.value = image;
 
     resetElementPool();
+    bus.emit("onChangeBackground");
   });
 };
 
@@ -131,17 +135,78 @@ defineExpose({
 <template>
   <div id="backgroundPanel" class="background-panel">
     <h3>设置背图</h3>
-    <div
-      @click="clickAddBackgroundBtn"
-      class="uploader"
-      :class="background ? 'uploaded' : ''"
-      :style="'background-image:url(' + bgUrl + ')'"
-    >
-      <div v-if="background === null">
-        <div style="text-align: center">
-          <el-icon><Picture /></el-icon>
+    <!-- 画布配置层 -->
+    <div class="background-setting">
+      <div
+        @click="clickAddBackgroundBtn"
+        class="uploader"
+        :class="background ? 'uploaded' : ''"
+        :style="'background-image:url(' + bgUrl + ')'"
+      >
+        <div v-if="background === null">
+          <div style="text-align: center">
+            <el-icon><Picture /></el-icon>
+          </div>
+          <div>上传套打底图</div>
         </div>
-        <div>上传套打底图</div>
+      </div>
+      <div class="setting">
+        <div class="setting-item">
+          <div class="setting-item-title">X轴偏移: </div>
+          <div class="setting-item-content">
+            <el-input-number
+              size="small"
+              v-model="adjustPointsGroup.x"
+              :min="-100"
+              :max="100"
+              :step="1"
+              :value-on-clear="0"
+              controls-position=""
+            ></el-input-number>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-item-title">Y轴偏移: </div>
+          <div class="setting-item-content">
+            <el-input-number
+              size="small"
+              v-model="adjustPointsGroup.y"
+              :min="-100"
+              :max="100"
+              :step="1"
+              :value-on-clear="0"
+              controls-position=""
+            ></el-input-number>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-item-title">X轴缩放: </div>
+          <div class="setting-item-content">
+            <el-input-number
+              size="small"
+              v-model="adjustPointsGroup.scaleX"
+              :min="0.1"
+              :max="2"
+              :step="0.05"
+              :value-on-clear="1"
+              controls-position=""
+            ></el-input-number>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-item-title">Y轴缩放: </div>
+          <div class="setting-item-content">
+            <el-input-number
+              size="small"
+              v-model="adjustPointsGroup.scaleY"
+              :min="0.1"
+              :max="2"
+              :step="0.05"
+              :value-on-clear="1"
+              controls-position=""
+            ></el-input-number>
+          </div>
+        </div>
       </div>
     </div>
     <input
@@ -154,6 +219,7 @@ defineExpose({
 
     <el-button @click="addAnchorPoint" plain>导入定位点</el-button>
     <el-button @click="addFixedPoint" plain>导入矫正点</el-button>
+    <el-button @click="cleanFixedPoint" plain>清除矫正点</el-button>
     <!-- <h4>打印偏移校对</h4>
     <div class="adjust">
       <div>
@@ -216,14 +282,33 @@ defineExpose({
   </div>
 </template>
 <style lang="scss" scoped>
+
+.background-setting{
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  height: 100%;
+  margin: 8px 0;
+  .setting-item{
+    display: flex;
+    justify-content: space-between;
+    padding:5px 0;
+    .setting-item-title{
+      font-size: 13px;
+      align-self: center;
+      margin-right: 10px;
+    }
+  }
+}
 .background-panel {
-  $uploaderWidth: 320px;
-  $uploaderHeight: 240px;
+  $uploaderWidth: 200px;
+  $uploaderHeight: 150px;
   .uploader {
     border: 1px dashed var(--el-color-info-light-3);
     border-radius: 4px;
-    margin: 20px 0 10px;
-    margin-left: 75px;
+    // margin: 20px 0 10px;
+    // margin-left: 150px;
     width: $uploaderWidth;
     height: $uploaderHeight;
     cursor: pointer;
@@ -233,34 +318,34 @@ defineExpose({
     display: flex;
     justify-content: center;
     align-items: center;
-    .padding {
-      position: relative;
-      left: 0;
-      top: 0;
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      > * {
-        position: absolute;
-        &.top {
-          top: -15px;
-          left: 105px;
-        }
-        &.bottom {
-          bottom: -15px;
-          left: 105px;
-        }
-        &.left {
-          top: 107px;
-          left: -70px;
-        }
-        &.right {
-          top: 107px;
-          right: -70px;
-        }
-      }
-    }
+    // .padding {
+    //   position: relative;
+    //   left: 0;
+    //   top: 0;
+    //   margin: 0;
+    //   padding: 0;
+    //   width: 100%;
+    //   height: 100%;
+    //   > * {
+    //     position: absolute;
+    //     &.top {
+    //       top: -15px;
+    //       left: 105px;
+    //     }
+    //     &.bottom {
+    //       bottom: -15px;
+    //       left: 105px;
+    //     }
+    //     &.left {
+    //       top: 107px;
+    //       left: -70px;
+    //     }
+    //     &.right {
+    //       top: 107px;
+    //       right: -70px;
+    //     }
+    //   }
+    // }
   }
   .adjust,
   .resolution {

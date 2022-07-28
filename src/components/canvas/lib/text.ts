@@ -55,7 +55,7 @@ export default class Text extends Element {
       this.text,
       new PIXI.TextStyle(option?.style || this.style)
     );
-    this.sprite.anchor.set(0.5);
+    // this.sprite.anchor.set(0.5);
     this.sprite.x = option?.x || this.app.screen.width / 2;
     this.sprite.y = option?.y || this.app.screen.height / 2;
 
@@ -64,6 +64,9 @@ export default class Text extends Element {
     this.sprite.width = option?.width || this.sprite.width;
     this.sprite.height = option?.height || this.sprite.height;
     this.sprite.zIndex = option?.zIndex || this.sprite.zIndex;
+
+    this.sprite.scale.x = option?.scaleX ?? 1;
+    this.sprite.scale.y = option?.scaleY ?? 1;
 
     this.app.stage.addChild(this.sprite);
     if (this.dragEvent != null) {

@@ -12,6 +12,8 @@ import bus from "@/lib/bus";
 import backgroundPanel from "./panels/background.vue";
 import certDataPanel from "./panels/certData.vue";
 import { ElMessage } from "element-plus";
+// 矫正参数
+const adjustPointsGroup = inject<any>("adjustPointsGroup");
 
 // 套打背图
 const backgroundPanelRef = ref<any>(null);
@@ -26,7 +28,8 @@ bus.on("initByCanvas", (_controller) => {
   controller.value = _controller;
 });
 
-const { getFileToUrl, subscribeDragEvent, getAdjustParam } = mixin();
+const { getFileToUrl, subscribeDragEvent, getAdjustParam, restoreAnchorPoint } =
+  mixin();
 
 // 恢复已经加载的元素
 const resetElementPool = () => {
@@ -54,6 +57,12 @@ const getFileToImage = (event: any) => {
 
 //#endregion
 
+// 手动偏移量
+// const _x = 40.49233755015909;
+// const _y = 55.40055521831494;
+// const _scaleX = 0.9875814793052281;
+// const _scaleY = 0.9981776630412041;
+
 //#region 导出套打图
 const output = () => {
   console.log(controller.value.app.stage);
@@ -75,18 +84,31 @@ const output = () => {
   //   }
   //   elementContainer.addChild(element.sprite);
 
-  //   // element.reset({
-  //   //   x: element.sprite.x + adjustParam.x,
-  //   //   y: element.sprite.y + adjustParam.y,
-  //   //   scale: adjustParam.scale,
-  //   // });
+  //   element.reset({
+  //     x: element.sprite.x - adjustParam.x,
+  //     y: element.sprite.y - adjustParam.y,
+  //     // scale: adjustParam.scale,
+  //     scaleX: adjustParam.scaleX,
+  //     scaleY: adjustParam.scaleY,
+  //   });
   // });
-  controller.value.app.stage.x = controller.value.app.stage.x - adjustParam.x;
-  controller.value.app.stage.y = controller.value.app.stage.y - adjustParam.y;
-  controller.value.app.stage.scale.x = adjustParam.scale;
-  controller.value.app.stage.scale.y = adjustParam.scale;
+  // if (
+  //   adjustPointsGroup.value.fixedPoints.a &&
+  //   adjustPointsGroup.value.fixedPoints.b
+  // ) {
+  // controller.value.app.stage.scale.x =
+  //   controller.value.app.stage.scale.x / adjustParam.scaleX;
+  controller.value.app.stage.scale.x = adjustPointsGroup.scaleX;
+  controller.value.app.stage.scale.y = adjustPointsGroup.scaleY;
+  // controller.value.app.stage.x = -adjustPointsGroup.value.fixedPoints.a.x;
+  // controller.value.app.stage.y = controller.value.app.stage.y - adjustParam.y;
+  // controller.value.app.stage.y = -adjustPointsGroup.value.fixedPoints.a.y;
+  controller.value.app.stage.x = -adjustPointsGroup.x;
+  controller.value.app.stage.y = -adjustPointsGroup.y;
 
-  console.log(controller.value.app.stage);
+  // }
+
+  // console.log(controller.value.app.stage);
   // controller.value.app.stage.children.forEach((child: any) => {
   //   child.scale = adjustParam.scale;
   //   child.position.set(child.x + adjustParam.x, child.y + adjustParam.y);
@@ -127,6 +149,11 @@ const output = () => {
 };
 // 恢复到导出前的样子
 const restore = () => {
+  controller.value.app.stage.x = 0;
+  controller.value.app.stage.y = 0;
+  controller.value.app.stage.scale.x = 1;
+  controller.value.app.stage.scale.y = 1;
+
   // controller.value.app.stage.removeChildren();
   if (backgroundPanelRef.value.background?.sprite) {
     controller.value.app.stage.addChild(
@@ -135,12 +162,13 @@ const restore = () => {
   }
 
   resetElementPool();
+  restoreAnchorPoint();
 };
 //#endregion
 </script>
 <template>
   <div id="leftSide" class="left-side">
-    <h1 class="title">套打控制台</h1>
+    <h2 class="title">套打控制台</h2>
     <backgroundPanel ref="backgroundPanelRef" />
     <certDataPanel style="margin-top: 10px" />
 

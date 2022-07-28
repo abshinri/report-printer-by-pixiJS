@@ -61,7 +61,7 @@ const applyStyle = () => {
 </script>
 <template>
   <div id="rightSide">
-    <h1 class="title">当前元素</h1>
+    <h2 class="title">当前元素</h2>
     <div class="empty" v-if="currentElements.length == 0">请先选择元素</div>
     <div v-else class="current-element">
       <div>当前选择元素:</div>

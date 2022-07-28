@@ -2,8 +2,10 @@ import * as PIXI from "pixi.js";
 import { ref, inject } from "vue";
 import bus from "@/lib/bus";
 import { ElMessage } from "element-plus";
-import png_aim_red from "@/assets/aim_red.png";
-import png_aim_green from "@/assets/aim_green.png";
+import png_aim_red_a from "@/assets/aim_red_a.png";
+import png_aim_red_b from "@/assets/aim_red_b.png";
+import png_aim_green_a from "@/assets/aim_green_a.png";
+import png_aim_green_b from "@/assets/aim_green_b.png";
 export default function () {
   // 元素池
   const elementPool = inject<any>("elementPool");
@@ -28,7 +30,7 @@ export default function () {
 
   // 删除mm元素
   document.querySelector("body")?.removeChild(mmDiv);
-  
+
   const pxToMm = (px: number, float: number = 5) => {
     return parseFloat((px / mmUnit.width).toFixed(float));
   };
@@ -132,8 +134,7 @@ export default function () {
   /** 添加定位锚点 */
 
   let selectedAnchor: any;
-  function onDragAnchorStart(this: any, event: any, element: any) {
-    console.log("anchor start");
+  function onDragAnchorStart(this: any, event: any) {
     this.alpha = 0.5;
     selectedAnchor = this;
     controller.value.app.stage.on("pointermove", onDragAnchorMove);
@@ -152,9 +153,11 @@ export default function () {
     );
   }
 
-  const getAnchorPoint = (x: number, y: number, type: string) => {
+  /** 转换出锚点精灵图
+   * 需要注意的是所有的B锚点坐标不能小于A锚点,矫正锚点拖动后需要实时算出矫正数据*/
+  const getAnchorPoint = (x: number, y: number, type: string, ext?: any) => {
     let aim = new Image();
-    aim.src = type === "red" ? png_aim_red : png_aim_green;
+    aim.src = type;
 
     const sprite = PIXI.Sprite.from(aim);
     sprite.anchor.set(0.5);
@@ -163,46 +166,118 @@ export default function () {
 
     sprite.buttonMode = true;
 
-    sprite.width = 100;
-    sprite.height = 100;
+    sprite.width = controller.value.app.renderer.width / 5;
+    sprite.height = sprite.width;
 
     sprite.interactive = true;
     sprite.on("pointerdown", onDragAnchorStart);
     sprite.on("pointerup", onDragAnchorEnd);
-    sprite.on("pointerupoutside", onDragAnchorMove);
+    sprite.on("pointerupoutside", onDragAnchorEnd);
     return sprite;
   };
 
   // 增加定位锚点
   const addAnchorPoint = () => {
-    const anchorPoint_a = getAnchorPoint(0, 0, "red");
-    controller.value.app.stage.addChild(anchorPoint_a);
-    const anchorPoint_b = getAnchorPoint(
-      controller.value.app.screen.width,
-      controller.value.app.screen.height,
-      "red"
-    );
-    controller.value.app.stage.addChild(anchorPoint_b);
-    adjustPointsGroup.value.anchorPoints.a = anchorPoint_a;
-    adjustPointsGroup.value.anchorPoints.b = anchorPoint_b;
-  };
+    if (
+      adjustPointsGroup.value.anchorPoints.a != null &&
+      adjustPointsGroup.value.anchorPoints.b != null
+    ) {
+      adjustPointsGroup.value.anchorPoints.a.x = 0;
+      adjustPointsGroup.value.anchorPoints.a.y = 0;
+      adjustPointsGroup.value.anchorPoints.b.x =
+        controller.value.app.screen.width;
+      adjustPointsGroup.value.anchorPoints.b.y =
+        controller.value.app.screen.height;
+    } else {
+      adjustPointsGroup.value.anchorPoints.a = null;
+      adjustPointsGroup.value.anchorPoints.b = null;
 
+      const anchorPoint_a = getAnchorPoint(0, 0, png_aim_red_a);
+      controller.value.app.stage.addChild(anchorPoint_a);
+      const anchorPoint_b = getAnchorPoint(
+        controller.value.app.screen.width,
+        controller.value.app.screen.height,
+        png_aim_red_b,
+        "isAnchorB"
+      );
+      controller.value.app.stage.addChild(anchorPoint_b);
+      adjustPointsGroup.value.anchorPoints.a = anchorPoint_a;
+      adjustPointsGroup.value.anchorPoints.b = anchorPoint_b;
+    }
+  };
+  // 恢复定位点
+  const restoreAnchorPoint = () => {
+    if (adjustPointsGroup.value.anchorPoints.a) {
+      controller.value.app.stage.addChild(
+        adjustPointsGroup.value.anchorPoints.a
+      );
+    }
+    if (adjustPointsGroup.value.anchorPoints.b) {
+      controller.value.app.stage.addChild(
+        adjustPointsGroup.value.anchorPoints.b
+      );
+    }
+    if (adjustPointsGroup.value.fixedPoints.a) {
+      controller.value.app.stage.addChild(
+        adjustPointsGroup.value.fixedPoints.a
+      );
+    }
+    if (adjustPointsGroup.value.fixedPoints.b) {
+      controller.value.app.stage.addChild(
+        adjustPointsGroup.value.fixedPoints.b
+      );
+    }
+  };
   //  增加矫正锚点
   const addFixedPoint = () => {
-    const anchorPoint_a = getAnchorPoint(
-      controller.value.app.screen.width,
-      0,
-      "green"
-    );
-    controller.value.app.stage.addChild(anchorPoint_a);
-    const anchorPoint_b = getAnchorPoint(
-      0,
-      controller.value.app.screen.height,
-      "green"
-    );
-    controller.value.app.stage.addChild(anchorPoint_b);
-    adjustPointsGroup.value.fixedPoints.a = anchorPoint_a;
-    adjustPointsGroup.value.fixedPoints.b = anchorPoint_b;
+    if (
+      adjustPointsGroup.value.fixedPoints.a != null &&
+      adjustPointsGroup.value.fixedPoints.b != null
+    ) {
+      adjustPointsGroup.value.fixedPoints.a.x = 0;
+      adjustPointsGroup.value.fixedPoints.a.y = 0;
+      adjustPointsGroup.value.fixedPoints.b.x =
+        controller.value.app.screen.width;
+      adjustPointsGroup.value.fixedPoints.b.y =
+        controller.value.app.screen.height;
+    } else {
+      adjustPointsGroup.value.fixedPoints.a = null;
+      adjustPointsGroup.value.fixedPoints.b = null;
+
+      const fixedPoint_a = getAnchorPoint(0, 0, png_aim_green_a, "isFixedA");
+      controller.value.app.stage.addChild(fixedPoint_a);
+      const fixedPoint_b = getAnchorPoint(
+        controller.value.app.screen.width,
+        controller.value.app.screen.height,
+        png_aim_green_b,
+        "isFixedB"
+      );
+      controller.value.app.stage.addChild(fixedPoint_b);
+      adjustPointsGroup.value.fixedPoints.a = fixedPoint_a;
+      adjustPointsGroup.value.fixedPoints.b = fixedPoint_b;
+    }
+  };
+
+  const cleanFixedPoint = () => {
+    if (
+      adjustPointsGroup.value.anchorPoints.a != null &&
+      adjustPointsGroup.value.anchorPoints.b != null
+    ) {
+      adjustPointsGroup.value.anchorPoints.a.destroy();
+      adjustPointsGroup.value.anchorPoints.a = null;
+      adjustPointsGroup.value.anchorPoints.b.destroy();
+      adjustPointsGroup.value.anchorPoints.b = null;
+    }
+
+    if (
+      adjustPointsGroup.value.fixedPoints.a != null &&
+      adjustPointsGroup.value.fixedPoints.b != null
+    ) {
+      adjustPointsGroup.value.fixedPoints.a.destroy();
+      adjustPointsGroup.value.fixedPoints.a = null;
+      adjustPointsGroup.value.fixedPoints.b.destroy();
+      adjustPointsGroup.value.fixedPoints.b = null;
+    }
   };
 
   // 计算矫正参数
@@ -220,7 +295,8 @@ export default function () {
         fixedPoints: { a: null, b: null },
         x: 0,
         y: 0,
-        scale: 1,
+        scaleX: 1,
+        scaleY: 1,
       };
     }
     const rectOnCanvasWidth = Math.abs(
@@ -231,7 +307,7 @@ export default function () {
       adjustPointsGroup.value.anchorPoints.a.y -
         adjustPointsGroup.value.anchorPoints.b.y
     );
-    const rectOnCanvasSize = rectOnCanvasWidth * rectOnCanvasHeight;
+    // const rectOnCanvasSize = rectOnCanvasWidth * rectOnCanvasHeight;
     const rectOnPrintWidth = Math.abs(
       adjustPointsGroup.value.fixedPoints.a.x -
         adjustPointsGroup.value.fixedPoints.b.x
@@ -240,7 +316,7 @@ export default function () {
       adjustPointsGroup.value.fixedPoints.a.y -
         adjustPointsGroup.value.fixedPoints.b.y
     );
-    const rectOnPrintSize = rectOnPrintWidth * rectOnPrintHeight;
+    // const rectOnPrintSize = rectOnPrintWidth * rectOnPrintHeight;
     const result = {
       x:
         adjustPointsGroup.value.fixedPoints.a.x -
@@ -248,7 +324,8 @@ export default function () {
       y:
         adjustPointsGroup.value.fixedPoints.a.y -
         adjustPointsGroup.value.anchorPoints.a.y,
-      scale: rectOnPrintSize / rectOnCanvasSize,
+      scaleX: rectOnPrintWidth / rectOnCanvasWidth,
+      scaleY: rectOnPrintHeight / rectOnCanvasHeight,
     };
     adjustPointsGroup.value = {
       ...adjustPointsGroup.value,
@@ -281,6 +358,8 @@ export default function () {
     cmToPx,
     addAnchorPoint,
     addFixedPoint,
+    cleanFixedPoint,
+    restoreAnchorPoint,
     getAdjustParam,
     activeElement,
     deactiveElement,

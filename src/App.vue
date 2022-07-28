@@ -16,7 +16,8 @@ const adjustPointsGroup = ref<any>({
   fixedPoints: { a: null, b: null },
   x: 0,
   y: 0,
-  scale: 1,
+  scaleX: 1,
+  scaleY: 1,
 });
 provide("adjustPointsGroup", adjustPointsGroup);
 </script>
@@ -32,6 +33,7 @@ provide("adjustPointsGroup", adjustPointsGroup);
 <style lang="scss">
 @import "./assets/base.css";
 .report-printer {
+  user-select: none;
   width: 100%;
   height: 100vh;
   overflow: hidden;
