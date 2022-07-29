@@ -65,10 +65,10 @@ const getFileToImage = (event: any) => {
 
 //#region 导出套打图
 const output = () => {
-  console.log(controller.value.app.stage);
+  // console.log(controller.value.app.stage);
 
-  const adjustParam = getAdjustParam(false);
-  console.log(adjustParam);
+  // const adjustParam = getAdjustParam(false);
+  // console.log(adjustParam);
   // controller.value.app.stage.removeChildren();
   if (backgroundPanelRef.value.background?.sprite) {
     // backgroundPanelRef.value.background.sprite.destroy();
@@ -98,13 +98,13 @@ const output = () => {
   // ) {
   // controller.value.app.stage.scale.x =
   //   controller.value.app.stage.scale.x / adjustParam.scaleX;
-  controller.value.app.stage.scale.x = adjustPointsGroup.scaleX;
-  controller.value.app.stage.scale.y = adjustPointsGroup.scaleY;
+  controller.value.app.stage.scale.x = adjustPointsGroup.value.scaleX;
+  controller.value.app.stage.scale.y = adjustPointsGroup.value.scaleY;
   // controller.value.app.stage.x = -adjustPointsGroup.value.fixedPoints.a.x;
   // controller.value.app.stage.y = controller.value.app.stage.y - adjustParam.y;
   // controller.value.app.stage.y = -adjustPointsGroup.value.fixedPoints.a.y;
-  controller.value.app.stage.x = -adjustPointsGroup.x;
-  controller.value.app.stage.y = -adjustPointsGroup.y;
+  controller.value.app.stage.x = -adjustPointsGroup.value.x;
+  controller.value.app.stage.y = -adjustPointsGroup.value.y;
 
   // }
 

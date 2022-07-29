@@ -157,9 +157,8 @@ defineExpose({
             <el-input-number
               size="small"
               v-model="adjustPointsGroup.x"
-              :min="-100"
-              :max="100"
               :step="1"
+              :precision="3"
               :value-on-clear="0"
               controls-position=""
             ></el-input-number>
@@ -171,9 +170,8 @@ defineExpose({
             <el-input-number
               size="small"
               v-model="adjustPointsGroup.y"
-              :min="-100"
-              :max="100"
               :step="1"
+              :precision="3"
               :value-on-clear="0"
               controls-position=""
             ></el-input-number>
@@ -188,6 +186,7 @@ defineExpose({
               :min="0.1"
               :max="2"
               :step="0.05"
+              :precision="3"
               :value-on-clear="1"
               controls-position=""
             ></el-input-number>
@@ -202,6 +201,7 @@ defineExpose({
               :min="0.1"
               :max="2"
               :step="0.05"
+              :precision="3"
               :value-on-clear="1"
               controls-position=""
             ></el-input-number>

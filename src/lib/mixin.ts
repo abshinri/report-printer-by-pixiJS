@@ -71,6 +71,29 @@ export default function () {
     fileReader.readAsDataURL(files[0]);
   };
 
+  /** 激活元素*/
+  const activeElement = (id: string, option: any = {}) => {
+    elementPool.value.find((element: any, index: number) => {
+      if (element.id === id) {
+        element.apply({
+          id: id,
+          zIndex: index,
+          dragEvent: subscribeDragEvent,
+          ...option,
+        });
+      }
+    });
+  };
+
+  /** 失活元素 */
+  const deactiveElement = (id: string) => {
+    elementPool.value.find((element: any) => {
+      if (element.id === id) {
+        element.remove();
+      }
+    });
+  };
+  // #region 元素拖拽事件
   let app: any;
   let selectedTarget: any;
   function onDragStart(this: any, event: any, element: any) {
@@ -97,30 +120,7 @@ export default function () {
     );
   }
 
-  /** 激活元素*/
-  const activeElement = (id: string, option: any = {}) => {
-    elementPool.value.find((element: any, index: number) => {
-      if (element.id === id) {
-        element.apply({
-          id: id,
-          zIndex: index,
-          dragEvent: subscribeDragEvent,
-          ...option,
-        });
-      }
-    });
-  };
-
-  /** 失活元素 */
-  const deactiveElement = (id: string) => {
-    elementPool.value.find((element: any) => {
-      if (element.id === id) {
-        element.remove();
-      }
-    });
-  };
-
-  // 注册点击事件
+  // 注册文字元素的点击事件
   const subscribeDragEvent = (element: any) => {
     app = element.app;
     element.sprite.interactive = true;
@@ -131,30 +131,77 @@ export default function () {
     element.sprite.on("pointerupoutside", onDragEnd);
   };
 
-  /** 添加定位锚点 */
+  // #endregion
+  // #region 锚点生成和拖拽
+  /** 转换出锚点精灵图
+   * 需要注意的是所有的B锚点坐标不能小于A锚点,矫正锚点拖动后需要实时算出矫正数据
+   * @param x x坐标
+   * @param y y坐标
+   * @param type 使用的精灵图
+   *
+   * */
 
+  /** 添加定位锚点 */
   let selectedAnchor: any;
-  function onDragAnchorStart(this: any, event: any) {
+  let currentAnchor: string = "";
+  function onDragAnchorStart(this: any, event: any, ext?: any) {
     this.alpha = 0.5;
     selectedAnchor = this;
+    currentAnchor = ext;
     controller.value.app.stage.on("pointermove", onDragAnchorMove);
   }
 
+  let gap = 10;
   function onDragAnchorEnd(this: any) {
     selectedAnchor.alpha = 1;
     controller.value.app.stage.off("pointermove", onDragAnchorMove);
+
+    if (currentAnchor === "isAnchorA") {
+      if (selectedAnchor.x >= adjustPointsGroup.value.anchorPoints.b.x + gap) {
+        adjustPointsGroup.value.anchorPoints.b.x = selectedAnchor.x + gap;
+      }
+      if (selectedAnchor.y >= adjustPointsGroup.value.anchorPoints.b.y + gap) {
+        adjustPointsGroup.value.anchorPoints.b.y = selectedAnchor.y + gap;
+      }
+    }
+
+    if (currentAnchor === "isFixedA") {
+      if (selectedAnchor.x >= adjustPointsGroup.value.fixedPoints.b.x + gap) {
+        adjustPointsGroup.value.fixedPoints.b.x = selectedAnchor.x + gap;
+      }
+      if (selectedAnchor.y >= adjustPointsGroup.value.fixedPoints.b.y + gap) {
+        adjustPointsGroup.value.fixedPoints.b.y = selectedAnchor.y + gap;
+      }
+    }
+
+    if (currentAnchor === "isAnchorB") {
+      if (selectedAnchor.x <= adjustPointsGroup.value.anchorPoints.a.x + gap) {
+        selectedAnchor.x = adjustPointsGroup.value.anchorPoints.a.x + gap;
+      }
+      if (selectedAnchor.y <= adjustPointsGroup.value.anchorPoints.a.y + gap) {
+        selectedAnchor.y = adjustPointsGroup.value.anchorPoints.a.y + gap;
+      }
+    }
+
+    if (currentAnchor === "isFixedB") {
+      if (selectedAnchor.x <= adjustPointsGroup.value.fixedPoints.a.x + gap) {
+        selectedAnchor.x = adjustPointsGroup.value.fixedPoints.a.x + gap;
+      }
+      if (selectedAnchor.y <= adjustPointsGroup.value.fixedPoints.a.y + gap) {
+        selectedAnchor.y = adjustPointsGroup.value.fixedPoints.a.y + gap;
+      }
+    }
+
+    getAdjustParam();
   }
 
-  function onDragAnchorMove(this: any, event: any) {
+  function onDragAnchorMove(this: any, event: any, ext?: any) {
     selectedAnchor.parent.toLocal(
       event.data.global,
       null,
       selectedAnchor.position
     );
   }
-
-  /** 转换出锚点精灵图
-   * 需要注意的是所有的B锚点坐标不能小于A锚点,矫正锚点拖动后需要实时算出矫正数据*/
   const getAnchorPoint = (x: number, y: number, type: string, ext?: any) => {
     let aim = new Image();
     aim.src = type;
@@ -169,8 +216,12 @@ export default function () {
     sprite.width = controller.value.app.renderer.width / 5;
     sprite.height = sprite.width;
 
+    gap = sprite.width / 2;
+
     sprite.interactive = true;
-    sprite.on("pointerdown", onDragAnchorStart);
+    sprite.on("pointerdown", function (event: any) {
+      onDragAnchorStart.call(sprite, event, ext);
+    });
     sprite.on("pointerup", onDragAnchorEnd);
     sprite.on("pointerupoutside", onDragAnchorEnd);
     return sprite;
@@ -192,7 +243,7 @@ export default function () {
       adjustPointsGroup.value.anchorPoints.a = null;
       adjustPointsGroup.value.anchorPoints.b = null;
 
-      const anchorPoint_a = getAnchorPoint(0, 0, png_aim_red_a);
+      const anchorPoint_a = getAnchorPoint(0, 0, png_aim_red_a, "isAnchorA");
       controller.value.app.stage.addChild(anchorPoint_a);
       const anchorPoint_b = getAnchorPoint(
         controller.value.app.screen.width,
@@ -350,7 +401,7 @@ export default function () {
 
     return adjustPointsGroup.value;
   };
-
+  // #endregion
   return {
     pxToMm,
     pxToCm,
