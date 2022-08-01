@@ -30,7 +30,7 @@ bus.on("initByCanvas", (_controller) => {
   controller.value = _controller;
 });
 
-const { getFileToUrl, addAnchorPoint, addFixedPoint, cleanFixedPoint } =
+const { getFileToUrl, addAnchorPoint, addFixedPoint, cleanFixedPoint, mmToPx } =
   mixin();
 
 //#region 背景图交互
@@ -39,20 +39,6 @@ const clickAddBackgroundBtn = () => {
   backgroudInputRef.value.click();
 };
 
-// 配置画布边距
-const padding = reactive<any>({
-  top: 0,
-  right: 0,
-  bottom: 0,
-  left: 0,
-});
-
-// 原始长宽
-const originSize = reactive<any>({
-  width: 0,
-  height: 0,
-});
-
 // 原图缩放比例
 const backgroudScale = ref<number>(1);
 
@@ -60,29 +46,24 @@ const bgUrl = ref<string>("");
 // 把上传的图片导入画布背景图
 const getFileToBackground = (event: any) => {
   getFileToUrl(event, (result: any, imgInfo: any) => {
+    const width = mmToPx(reportSize.width);
+    const height = mmToPx(reportSize.height);
     if (!result) return;
 
     if (background.value) {
       background.value.sprite.destroy();
       background.value = null;
     }
-    padding.top = 0;
-    padding.right = 0;
-    padding.bottom = 0;
-    padding.left = 0;
-    backgroudScale.value = 1;
     bgUrl.value = result;
-    originSize.width = imgInfo.width;
-    originSize.height = imgInfo.height;
 
-    // originSize.widthCm = pxToCm(imgInfo.width, 2);
-    // originSize.heightCm = pxToCm(imgInfo.height, 2);
-    controller.value.app.renderer.resize(
-      imgInfo.width + padding.left + padding.right,
-      imgInfo.height + padding.top + padding.bottom
-    );
     const image = controller.value.image();
-    image.apply(result, { zIndex: 0 });
+    image.apply(result, {
+      x: width / 2,
+      y: height / 2,
+      width: reportSize.width,
+      height: reportSize.height,
+      zIndex: 0,
+    });
     background.value = image;
 
     resetElementPool();
@@ -97,35 +78,27 @@ const resetElementPool = () => {
   });
 };
 //#endregion
-// 应用比例的更改
-const handleSizeChange = (scale?: number) => {
-  background.value.reset({ scale: scale || backgroudScale.value });
-  elementPool.value.forEach((element: any) => {
-    element.reset({ scale: scale || backgroudScale.value });
-  });
-  controller.value.app.stage.position.set(padding.left, padding.top);
-  controller.value.app.renderer.resize(
-    originSize.width * backgroudScale.value + padding.left + padding.right,
-    originSize.height * backgroudScale.value + padding.top + padding.bottom
-  );
+const reportSize = reactive({
+  width: 210,
+  height: 297,
+});
+// 更改报告大小
+const handleSizeChange = () => {
+  const width = mmToPx(reportSize.width);
+  const height = mmToPx(reportSize.height);
+  controller.value.app.renderer.resize(width, height);
+  if (background.value) {
+    background.value.sprite.x = width / 2;
+    background.value.sprite.y = height / 2;
+    background.value.sprite.width = width;
+    background.value.sprite.height = height;
+  }
 };
-// 应用padding的更改
-const handlePaddingChange = () => {
-  handleSizeChange(1);
-};
-
-// 应用缩放比例的更改
-const handleScaleChange = (current: number = 1, old: number = 1) => {
-  handleSizeChange(current / old);
-};
-
+// 通过定位点推导的偏移值
 const adjust = reactive({
   x: 0,
   y: 0,
 });
-const handleAdjustChange = (current: number = 1, old: number = 1) => {
-  handleSizeChange(1);
-};
 
 defineExpose({
   background,
@@ -135,6 +108,29 @@ defineExpose({
 <template>
   <div id="backgroundPanel" class="background-panel">
     <h3>设置背图</h3>
+    <!-- 设置背图大小 -->
+    <div class="background-size">
+      <div class="background-size-item">
+        <span>宽度</span>
+        <el-input
+          type="number"
+          v-model.number="reportSize.width"
+          @change="handleSizeChange"
+        >
+          <template #append>mm</template></el-input
+        >
+      </div>
+      <div class="background-size-item">
+        <span>高度</span>
+        <el-input
+          type="number"
+          v-model.number="reportSize.height"
+          @change="handleSizeChange"
+        >
+          <template #append>mm</template></el-input
+        >
+      </div>
+    </div>
     <!-- 画布配置层 -->
     <div class="background-setting">
       <div
@@ -152,7 +148,7 @@ defineExpose({
       </div>
       <div class="setting">
         <div class="setting-item">
-          <div class="setting-item-title">X轴偏移: </div>
+          <div class="setting-item-title">X轴偏移:</div>
           <div class="setting-item-content">
             <el-input-number
               size="small"
@@ -165,7 +161,7 @@ defineExpose({
           </div>
         </div>
         <div class="setting-item">
-          <div class="setting-item-title">Y轴偏移: </div>
+          <div class="setting-item-title">Y轴偏移:</div>
           <div class="setting-item-content">
             <el-input-number
               size="small"
@@ -178,7 +174,7 @@ defineExpose({
           </div>
         </div>
         <div class="setting-item">
-          <div class="setting-item-title">X轴缩放: </div>
+          <div class="setting-item-title">X轴缩放:</div>
           <div class="setting-item-content">
             <el-input-number
               size="small"
@@ -193,7 +189,7 @@ defineExpose({
           </div>
         </div>
         <div class="setting-item">
-          <div class="setting-item-title">Y轴缩放: </div>
+          <div class="setting-item-title">Y轴缩放:</div>
           <div class="setting-item-content">
             <el-input-number
               size="small"
@@ -282,19 +278,18 @@ defineExpose({
   </div>
 </template>
 <style lang="scss" scoped>
-
-.background-setting{
+.background-setting {
   display: flex;
   align-items: center;
   justify-content: space-around;
   width: 100%;
   height: 100%;
   margin: 8px 0;
-  .setting-item{
+  .setting-item {
     display: flex;
     justify-content: space-between;
-    padding:5px 0;
-    .setting-item-title{
+    padding: 5px 0;
+    .setting-item-title {
       font-size: 13px;
       align-self: center;
       margin-right: 10px;
