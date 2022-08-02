@@ -9,13 +9,15 @@ import { ref, reactive, defineExpose, onMounted } from "vue";
 import bus from "@/lib/bus";
 import controller from "./lib/controller";
 
+import mixin from "@/lib/mixin";
 import * as PIXI from "pixi.js";
-
+const { mmToPx } = mixin();
 const app = new PIXI.Application({
   backgroundAlpha: 0,
-  width: 320,
-  height: 240,
+  width: mmToPx(210),
+  height: mmToPx(297),
 });
+
 app.stage.interactive = true;
 app.stage.sortableChildren = true;
 
@@ -27,7 +29,7 @@ const canvasController = reactive<any>({
   elLeft: 0, // 元素的左偏移量
   elTop: 0, // 元素的右偏移量
 
-  zoom: 1, // 缩放比例
+  zoom: 0.5, // 缩放比例
   elWidth: 0, // 元素宽
   elHeight: 0, // 元素高
   meter_zoom: 0, // 子元素缩放比例
@@ -62,6 +64,8 @@ const initBodySize = function () {
   canvasController.meter_zoom = canvasController.elWidth / 100;
   canvasController.elLeft = canvasController.initWidth / 2;
   canvasController.elTop = canvasController.initHeight / 2;
+
+  canvasController.zoom = 0.5
 };
 
 const handleWeel = function (e: any) {
@@ -159,7 +163,7 @@ onMounted(() => {
 </template>
 <style lang="scss">
 .canvas-Ref {
-  border:2px solid #38404e;
+  border: 2px solid #38404e;
   .drag-controller {
     position: absolute;
     cursor: move;

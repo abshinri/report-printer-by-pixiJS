@@ -60,8 +60,8 @@ const getFileToBackground = (event: any) => {
     image.apply(result, {
       x: width / 2,
       y: height / 2,
-      width: reportSize.width,
-      height: reportSize.height,
+      width: width,
+      height: height,
       zIndex: 0,
     });
     background.value = image;
@@ -278,6 +278,14 @@ defineExpose({
   </div>
 </template>
 <style lang="scss" scoped>
+.background-size {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .background-size-item{
+    margin: 0 5px;
+  }
+}
 .background-setting {
   display: flex;
   align-items: center;
