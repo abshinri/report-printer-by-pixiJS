@@ -16,6 +16,7 @@ import {
 import mixin from "@/lib/mixin";
 import bus from "@/lib/bus";
 
+import { ElMessage } from "element-plus";
 // 矫正参数
 const adjustPointsGroup = inject<any>("adjustPointsGroup");
 // 套打背图
@@ -31,8 +32,14 @@ bus.on("initByCanvas", (_controller) => {
 });
 
 const isUploaded = ref(false);
-const { getFileToUrl, addAnchorPoint, addFixedPoint, cleanFixedPoint, mmToPx } =
-  mixin();
+const {
+  getFileToUrl,
+  addAnchorPoint,
+  addFixedPoint,
+  cleanFixedPoint,
+  restoreAnchorPoint,
+  mmToPx,
+} = mixin();
 
 //#region 背景图交互
 const backgroudInputRef = ref<any>(null);
@@ -71,12 +78,6 @@ const getFileToBackground = (event: any) => {
   });
 };
 
-// 恢复已经加载的元素
-const resetElementPool = () => {
-  elementPool.value.forEach((element: any) => {
-    element.reset({ scale: 1, adjust: { x: -adjust.x, y: -adjust.y } });
-  });
-};
 //#endregion
 const reportSize = reactive({
   width: 210,
@@ -94,20 +95,122 @@ const handleSizeChange = () => {
     background.value.sprite.height = height;
   }
 };
-// 通过定位点推导的偏移值
-const adjust = reactive({
-  x: 0,
-  y: 0,
-});
 
-defineExpose({
-  background,
-  adjust,
-});
+// 恢复已经加载的元素
+const resetElementPool = () => {
+  elementPool.value.forEach((element: any) => {
+    element.reset();
+  });
+};
+
+//#region 导出套打图
+const output = () => {
+  if (background.value.sprite) {
+    // backgroundPanelRef.value.background.sprite.destroy();
+    // 移除背景;
+    controller.value.app.stage.removeChild(background.value.sprite);
+  }
+
+  // elementPool.value.forEach((element: any) => {
+  //   if (!element.sprite) {
+  //     return;
+  //   }
+  //   elementContainer.addChild(element.sprite);
+
+  //   element.reset({
+  //     x: element.sprite.x - adjustParam.x,
+  //     y: element.sprite.y - adjustParam.y,
+  //     // scale: adjustParam.scale,
+  //     scaleX: adjustParam.scaleX,
+  //     scaleY: adjustParam.scaleY,
+  //   });
+  // });
+  // if (
+  //   adjustPointsGroup.value.fixedPoints.a &&
+  //   adjustPointsGroup.value.fixedPoints.b
+  // ) {
+  // controller.value.app.stage.scale.x =
+  //   controller.value.app.stage.scale.x / adjustParam.scaleX;
+  controller.value.app.stage.scale.x = adjustPointsGroup.value.scaleX;
+  controller.value.app.stage.scale.y = adjustPointsGroup.value.scaleY;
+  // controller.value.app.stage.x = -adjustPointsGroup.value.fixedPoints.a.x;
+  // controller.value.app.stage.y = controller.value.app.stage.y - adjustParam.y;
+  // controller.value.app.stage.y = -adjustPointsGroup.value.fixedPoints.a.y;
+  controller.value.app.stage.x = -adjustPointsGroup.value.x;
+  controller.value.app.stage.y = -adjustPointsGroup.value.y;
+
+  // }
+
+  // console.log(controller.value.app.stage);
+  // controller.value.app.stage.children.forEach((child: any) => {
+  //   child.scale = adjustParam.scale;
+  //   child.position.set(child.x + adjustParam.x, child.y + adjustParam.y);
+  // });
+
+  controller.value.app.render();
+  const dataURL = controller.value.app.view.toDataURL("image/png", 1);
+
+  restore();
+  const newWindow = window.open();
+  if (newWindow) {
+    newWindow.document.write(
+      `<html><head><title>套打图</title>
+      <style>
+      @page {
+        margin: 0;
+      }
+      </style>
+        </head>
+        <body style="margin:0;padding:0;">
+          <img src="${dataURL}" style="width:100vw;height:auto;" />
+        </body>
+      </html>`
+    );
+    newWindow.document.close();
+    // 打印
+    newWindow.print();
+    newWindow.onafterprint = function () {
+      newWindow.close();
+    };
+  } else {
+    ElMessage.error("请允许弹窗打开");
+  }
+  // const a = document.createElement("a");
+  // a.href = dataURL;
+  // a.download = "套打图.png";
+  // a.click();
+};
+// 恢复到导出前的样子
+const restore = () => {
+  controller.value.app.stage.x = 0;
+  controller.value.app.stage.y = 0;
+  controller.value.app.stage.scale.x = 1;
+  controller.value.app.stage.scale.y = 1;
+
+  // controller.value.app.stage.removeChildren();
+  if (background.value.sprite) {
+    controller.value.app.stage.addChild(background.value.sprite);
+  }
+
+  resetElementPool();
+  restoreAnchorPoint();
+};
 </script>
 <template>
   <div id="backgroundPanel" class="background-panel">
-    <h3>设置背图</h3>
+    <!-- 上传 -->
+    <div class="background-uploader">
+      <div @click="clickAddBackgroundBtn" class="uploader printer-btn">
+        <div v-if="!isUploaded">
+          <el-icon><Picture /></el-icon>
+          <div>上传底图</div>
+        </div>
+        <div v-else>
+          <el-icon><Refresh /></el-icon>
+          <div>更换底图</div>
+        </div>
+      </div>
+    </div>
     <!-- 设置背图大小 -->
     <div class="background-size">
       <div class="background-size-item">
@@ -116,6 +219,7 @@ defineExpose({
           type="number"
           v-model.number="reportSize.width"
           @change="handleSizeChange"
+          size="small"
         >
           <template #append>mm</template></el-input
         >
@@ -126,6 +230,7 @@ defineExpose({
           type="number"
           v-model.number="reportSize.height"
           @change="handleSizeChange"
+          size="small"
         >
           <template #append>mm</template></el-input
         >
@@ -133,19 +238,6 @@ defineExpose({
     </div>
     <!-- 画布配置层 -->
     <div class="background-setting">
-      <div
-        @click="clickAddBackgroundBtn"
-        class="uploader"
-        :class="background ? 'uploaded' : ''"
-        :style="'background-image:url(' + bgUrl + ')'"
-      >
-        <div v-if="!isUploaded">
-          <div style="text-align: center">
-            <el-icon><Picture /></el-icon>
-          </div>
-          <div>上传套打底图</div>
-        </div>
-      </div>
       <div class="setting">
         <div class="setting-item">
           <div class="setting-item-title">X轴偏移:</div>
@@ -205,6 +297,19 @@ defineExpose({
         </div>
       </div>
     </div>
+    <div class="background-fixed">
+      <el-button @click="addAnchorPoint" plain>导入定位点</el-button>
+      <el-button @click="addFixedPoint" plain>导入矫正点</el-button>
+      <el-button @click="cleanFixedPoint" plain>清除矫正点</el-button>
+    </div>
+    <div class="export">
+      <div @click="output" class="exporter printer-btn">
+        <div>
+          <el-icon><Picture /></el-icon>
+          <div>导出结果</div>
+        </div>
+      </div>
+    </div>
     <input
       type="file"
       ref="backgroudInputRef"
@@ -212,88 +317,48 @@ defineExpose({
       @change="getFileToBackground"
       style="display: none"
     />
-    <el-button @click="addAnchorPoint" plain>导入定位点</el-button>
-    <el-button @click="addFixedPoint" plain>导入矫正点</el-button>
-    <el-button @click="cleanFixedPoint" plain>清除矫正点</el-button>
   </div>
 </template>
 <style lang="scss" scoped>
-.background-size {
+#backgroundPanel {
+  padding: 0px 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: space-between;
+
   align-items: center;
-  .background-size-item{
-    margin: 0 5px;
+  .background-uploader {
+    width: 180px;
   }
-}
-.background-setting {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  width: 100%;
-  height: 100%;
-  margin: 8px 0;
-  .setting-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-    .setting-item-title {
-      font-size: 13px;
-      align-self: center;
-      margin-right: 10px;
+  .exporter,
+  .uploader {
+    padding: 12px 20px;
+    .el-icon {
+      padding-right: 10px;
+      font-size: 40px;
+    }
+    > div {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
     }
   }
-}
-.background-panel {
-  $uploaderWidth: 200px;
-  $uploaderHeight: 150px;
-  .uploader {
-    border: 1px dashed var(--el-color-info-light-3);
-    border-radius: 4px;
-    // margin: 20px 0 10px;
-    // margin-left: 150px;
-    width: $uploaderWidth;
-    height: $uploaderHeight;
-    cursor: pointer;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
+
+  .background-size {
+    width: 300px;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    // .padding {
-    //   position: relative;
-    //   left: 0;
-    //   top: 0;
-    //   margin: 0;
-    //   padding: 0;
-    //   width: 100%;
-    //   height: 100%;
-    //   > * {
-    //     position: absolute;
-    //     &.top {
-    //       top: -15px;
-    //       left: 105px;
-    //     }
-    //     &.bottom {
-    //       bottom: -15px;
-    //       left: 105px;
-    //     }
-    //     &.left {
-    //       top: 107px;
-    //       left: -70px;
-    //     }
-    //     &.right {
-    //       top: 107px;
-    //       right: -70px;
-    //     }
-    //   }
-    // }
+
+    .background-size-item {
+      width: 120px;
+      ::v-deep(.el-input-group__append) {
+        padding: 0 10px;
+      }
+    }
   }
-  .adjust,
-  .resolution {
-    display: flex;
-    justify-content: space-between;
+  .background-setting {
+    width: 500px;
+  }
+  .background-fixed {
+    width: 200px;
   }
 }
 </style>

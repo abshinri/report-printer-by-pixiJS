@@ -3,7 +3,7 @@ import { ref, onMounted, provide } from "vue";
 import Canvas from "./components/canvas/index.vue";
 import LeftSide from "./components/leftSide/index.vue";
 import RightSide from "./components/rightSide/index.vue";
-
+import Top from "./components/top/index.vue";
 // 初始化画布元素池,导入所有的证照数据
 const elementPool = ref<any>([]);
 provide("elementPool", elementPool);
@@ -21,40 +21,51 @@ const adjustPointsGroup = ref<any>({
 });
 provide("adjustPointsGroup", adjustPointsGroup);
 // 套打底图的数据
-const background = ref<any>({hadImage:false});
+const background = ref<any>({ hadImage: false });
 provide("background", background);
 </script>
 
 <template>
   <div class="report-printer">
-    <LeftSide ref="leftSideRef" class="left-side"></LeftSide>
-    <Canvas ref="canvasRef" class="canvas"></Canvas>
-    <RightSide ref="rightSideRef" class="right-side"></RightSide>
+    <Top ref="topRef" class="top"></Top>
+    <div class="content">
+      <LeftSide ref="leftSideRef" class="left-side"></LeftSide>
+      <Canvas ref="canvasRef" class="canvas"></Canvas>
+      <RightSide ref="rightSideRef" class="right-side"></RightSide>
+    </div>
   </div>
 </template>
 
 <style lang="scss">
 @import "./assets/base.css";
 .report-printer {
-  user-select: none;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  justify-content: space-between;
-  background: #ddd;
-  > div {
-    background: #fff;
-    height: 100%;
+  .top {
+    background: #38404e;
+    width: 100vw;
+    height: 80px;
   }
-  .left-side {
-    width: 500px;
-  }
-  .canvas {
-    flex: 1;
-  }
-  .right-side {
-    width: 400px;
+  .content {
+    user-select: none;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    background: #ddd;
+    > div {
+      background: #38404e;
+      height: 100%;
+    }
+    .left-side {
+      height: 80px;
+      width: 500px;
+    }
+    .canvas {
+      flex: 1;
+    }
+    .right-side {
+      width: 400px;
+    }
   }
 }
 </style>

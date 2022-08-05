@@ -152,7 +152,7 @@ onMounted(() => {
 </template>
 <style lang="scss">
 .canvas-Ref {
-  border: 2px solid #38404e;
+  border: 2px solid #272d37;
   .drag-controller {
     position: absolute;
     cursor: move;
@@ -166,7 +166,7 @@ onMounted(() => {
   // display: flex;
   // justify-content: center;
   // align-items: center;
-  background: #38404e url(../../assets/tile.png) 56px 56px !important;
+  background: #272d37 url(../../assets/tile.png) 56px 56px !important;
   .hint {
     position: absolute;
     z-index: 0;
@@ -174,7 +174,7 @@ onMounted(() => {
     left: 0;
     width: 100%;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
+    // background: rgba(0, 0, 0, 0.5);
     color: #fff;
     text-align: center;
     line-height: 100vh;

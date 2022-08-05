@@ -67,7 +67,6 @@ const applyStyle = () => {
       v-if="currentElements.length !== 0"
       >应用配置</el-button
     >
-    <h2 class="title">当前元素</h2>
     <div class="setting-content">
       <div class="empty" v-if="currentElements.length == 0">请先选择元素</div>
       <div v-else class="current-element">
@@ -267,7 +266,6 @@ const applyStyle = () => {
   word-break: break-all;
 }
 .title {
-  border-bottom: 3px solid var(--el-color-primary);
   padding-bottom: 5px;
   margin-bottom: 10px;
 }

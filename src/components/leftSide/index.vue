@@ -5,174 +5,28 @@ export default {
 };
 </script>
 <script setup lang="ts">
-import { ref, reactive, defineEmits, onMounted, computed, inject } from "vue";
-import * as PIXI from "pixi.js";
+import { ref, inject } from "vue";
 import mixin from "@/lib/mixin";
 import bus from "@/lib/bus";
-import backgroundPanel from "./panels/background.vue";
 import certDataPanel from "./panels/certData.vue";
-import { ElMessage } from "element-plus";
 // 矫正参数
 const adjustPointsGroup = inject<any>("adjustPointsGroup");
 
 // 套打背图
-const backgroundPanelRef = ref<any>(null);
+const background = inject<any>("background");
 // 画布控制器
 const controller = ref<any>(null);
-// 元素池
-const elementPool = inject<any>("elementPool");
-const elementContainer = new PIXI.Container();
 
 // 初始化画布控制器
 bus.on("initByCanvas", (_controller) => {
   controller.value = _controller;
 });
 
-const { getFileToUrl, subscribeDragEvent, getAdjustParam, restoreAnchorPoint } =
-  mixin();
-
-// 恢复已经加载的元素
-const resetElementPool = () => {
-  elementPool.value.forEach((element: any) => {
-    element.reset();
-  });
-};
-//#region 图片交互
-const imageInputRef = ref<any>(null);
-const clickAddImageBtn = () => {
-  imageInputRef.value.click();
-};
-
-// 把上传的图片导入画布
-const getFileToImage = (event: any) => {
-  getFileToUrl(event, (result: any) => {
-    if (!result) return;
-    const image = controller.value.image();
-    image.init(result, { zIndex: elementPool.value.length + 1 });
-
-    subscribeDragEvent(image);
-    elementPool.value.push(image);
-  });
-};
-
-//#endregion
-
-// 手动偏移量
-// const _x = 40.49233755015909;
-// const _y = 55.40055521831494;
-// const _scaleX = 0.9875814793052281;
-// const _scaleY = 0.9981776630412041;
-
-//#region 导出套打图
-const output = () => {
-  // console.log(controller.value.app.stage);
-
-  // const adjustParam = getAdjustParam(false);
-  // console.log(adjustParam);
-  // controller.value.app.stage.removeChildren();
-  if (backgroundPanelRef.value.background?.sprite) {
-    // backgroundPanelRef.value.background.sprite.destroy();
-    // 移除背景;
-    controller.value.app.stage.removeChild(
-      backgroundPanelRef.value.background?.sprite
-    );
-  }
-
-  // elementPool.value.forEach((element: any) => {
-  //   if (!element.sprite) {
-  //     return;
-  //   }
-  //   elementContainer.addChild(element.sprite);
-
-  //   element.reset({
-  //     x: element.sprite.x - adjustParam.x,
-  //     y: element.sprite.y - adjustParam.y,
-  //     // scale: adjustParam.scale,
-  //     scaleX: adjustParam.scaleX,
-  //     scaleY: adjustParam.scaleY,
-  //   });
-  // });
-  // if (
-  //   adjustPointsGroup.value.fixedPoints.a &&
-  //   adjustPointsGroup.value.fixedPoints.b
-  // ) {
-  // controller.value.app.stage.scale.x =
-  //   controller.value.app.stage.scale.x / adjustParam.scaleX;
-  controller.value.app.stage.scale.x = adjustPointsGroup.value.scaleX;
-  controller.value.app.stage.scale.y = adjustPointsGroup.value.scaleY;
-  // controller.value.app.stage.x = -adjustPointsGroup.value.fixedPoints.a.x;
-  // controller.value.app.stage.y = controller.value.app.stage.y - adjustParam.y;
-  // controller.value.app.stage.y = -adjustPointsGroup.value.fixedPoints.a.y;
-  controller.value.app.stage.x = -adjustPointsGroup.value.x;
-  controller.value.app.stage.y = -adjustPointsGroup.value.y;
-
-  // }
-
-  // console.log(controller.value.app.stage);
-  // controller.value.app.stage.children.forEach((child: any) => {
-  //   child.scale = adjustParam.scale;
-  //   child.position.set(child.x + adjustParam.x, child.y + adjustParam.y);
-  // });
-
-  controller.value.app.render();
-  const dataURL = controller.value.app.view.toDataURL("image/png", 1);
-
-  restore();
-  const newWindow = window.open();
-  if (newWindow) {
-    newWindow.document.write(
-      `<html><head><title>套打图</title>
-      <style>
-      @page {
-        margin: 0;
-      }
-      </style>
-        </head>
-        <body style="margin:0;padding:0;">
-          <img src="${dataURL}" style="width:100vw;height:auto;" />
-        </body>
-      </html>`
-    );
-    newWindow.document.close();
-    // 打印
-    newWindow.print();
-    newWindow.onafterprint = function () {
-      newWindow.close();
-    };
-  } else {
-    ElMessage.error("请允许弹窗打开");
-  }
-  // const a = document.createElement("a");
-  // a.href = dataURL;
-  // a.download = "套打图.png";
-  // a.click();
-};
-// 恢复到导出前的样子
-const restore = () => {
-  controller.value.app.stage.x = 0;
-  controller.value.app.stage.y = 0;
-  controller.value.app.stage.scale.x = 1;
-  controller.value.app.stage.scale.y = 1;
-
-  // controller.value.app.stage.removeChildren();
-  if (backgroundPanelRef.value.background?.sprite) {
-    controller.value.app.stage.addChild(
-      backgroundPanelRef.value.background?.sprite
-    );
-  }
-
-  resetElementPool();
-  restoreAnchorPoint();
-};
 //#endregion
 </script>
 <template>
   <div id="leftSide" class="left-side">
-    <h2 class="title">套打控制台</h2>
-    <backgroundPanel ref="backgroundPanelRef" />
     <certDataPanel style="margin-top: 10px" />
-
-    <el-button @click="output" plain>导出结果</el-button>
   </div>
 </template>
 <style lang="scss" scoped>
@@ -184,7 +38,6 @@ const restore = () => {
   padding: 10px;
 }
 .title {
-  border-bottom: 3px solid var(--el-color-primary);
   padding-bottom: 5px;
   margin-bottom: 10px;
 }
