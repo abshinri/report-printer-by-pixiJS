@@ -36,43 +36,52 @@ bus.on("updateCurrentElements", () => {
 const { activeElement, deactiveElement } = mixin();
 const certData = ref<any>([
   {
-    type: "text",
     name: "证照名称",
     egName: "certName",
     content: "测试BLAHBLAHBLAH目录",
   },
   {
-    type: "text",
     name: "证照类型代码",
     egName: "certCode",
     content: "032123125123123124i",
   },
   {
-    type: "text",
     name: "证照编号",
     egName: "certNumber",
     content: "34123_231",
   },
   {
-    type: "text",
     name: "证照标识",
     egName: "certSign",
     content: "1.2.156.3005.2.062301.1101101102.0624_001.001.U",
+  },
+  {
+    name: "DEMO1",
+    egName: "DEMO1",
+    content: "18000000000",
+  },
+  {
+    name: "DEMO2",
+    egName: "DEMO2",
+    content: "1.2.QWEQWE624_001.001.U",
+  },
+  {
+    name: "DEMO3",
+    egName: "DEMO3",
+    content: "qw1231_213123dasfffa+++U",
   },
 ]);
 
 // 初始化元素池,除了Sprite全部配置好
 const initElementPool = () => {
   certData.value.forEach((item: any) => {
-    if (item.type === "text") {
-      elementPool.value.push(
-        controller.value.text().init(item.egName, {
-          type: "text",
-          text: item.content,
-          ...item,
-        })
-      );
-    }
+    elementPool.value.push(
+      controller.value.text().init(item.egName, {
+        type: "text",
+        text: item.content || item.egName,
+        ...item,
+      })
+    );
   });
 };
 
@@ -146,14 +155,13 @@ bus.on("initByCanvas", (_controller) => {
       :data="elementPool"
       style="margin: 10px 0; width: 100%"
       size="small"
-      max-height="600"
+      max-height="280"
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column prop="type" label="类型" width="50" />
       <el-table-column prop="name" label="字段名" width="80" />
       <el-table-column prop="egName" label="英文名" width="80" />
-      <el-table-column prop="content" label="内容预览" width="100" />
+      <el-table-column prop="content" label="内容预览" />
       <el-table-column label="操作" align="center">
         <template #default="{ row }">
           <div style="text-align: center">

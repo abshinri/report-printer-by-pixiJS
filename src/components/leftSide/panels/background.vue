@@ -19,7 +19,7 @@ import bus from "@/lib/bus";
 // 矫正参数
 const adjustPointsGroup = inject<any>("adjustPointsGroup");
 // 套打背图
-const background = ref<any>(null);
+const background = inject<any>("background");
 // 画布控制器
 const controller = ref<any>(null);
 // 元素池
@@ -30,6 +30,7 @@ bus.on("initByCanvas", (_controller) => {
   controller.value = _controller;
 });
 
+const isUploaded = ref(false);
 const { getFileToUrl, addAnchorPoint, addFixedPoint, cleanFixedPoint, mmToPx } =
   mixin();
 
@@ -38,9 +39,6 @@ const backgroudInputRef = ref<any>(null);
 const clickAddBackgroundBtn = () => {
   backgroudInputRef.value.click();
 };
-
-// 原图缩放比例
-const backgroudScale = ref<number>(1);
 
 const bgUrl = ref<string>("");
 // 把上传的图片导入画布背景图
@@ -68,6 +66,8 @@ const getFileToBackground = (event: any) => {
 
     resetElementPool();
     bus.emit("onChangeBackground");
+    bus.emit("initDragEvent");
+    isUploaded.value = true;
   });
 };
 
@@ -139,7 +139,7 @@ defineExpose({
         :class="background ? 'uploaded' : ''"
         :style="'background-image:url(' + bgUrl + ')'"
       >
-        <div v-if="background === null">
+        <div v-if="!isUploaded">
           <div style="text-align: center">
             <el-icon><Picture /></el-icon>
           </div>
@@ -212,69 +212,9 @@ defineExpose({
       @change="getFileToBackground"
       style="display: none"
     />
-
     <el-button @click="addAnchorPoint" plain>导入定位点</el-button>
     <el-button @click="addFixedPoint" plain>导入矫正点</el-button>
     <el-button @click="cleanFixedPoint" plain>清除矫正点</el-button>
-    <!-- <h4>打印偏移校对</h4>
-    <div class="adjust">
-      <div>
-        <div class="label">X轴</div>
-        <div class="input">
-          <el-input-number
-            v-model="adjust.x"
-            :min="-originSize.widthCm"
-            :max="originSize.widthCm"
-            @change="handleAdjustChange"
-          ></el-input-number>
-          <span>cm</span>
-        </div>
-      </div>
-      <div>
-        <div class="label">Y轴</div>
-        <div class="input">
-          <el-input-number
-            v-model="adjust.y"
-            :min="-originSize.heightCm"
-            :max="originSize.heightCm"
-            @change="handleAdjustChange"
-          ></el-input-number>
-          <span>cm</span>
-        </div>
-      </div>
-    </div>
-    <h4>画布信息</h4>
-    <div class="resolution" v-if="background !== null">
-      <div class="original">
-        <div>原始分辨率</div>
-        <div>
-          <span>宽:</span><span>{{ originSize.widthCm }}cm</span> x
-          <span>高:</span><span>{{ originSize.heightCm }}cm</span>
-        </div>
-      </div>
-      <div class="scale">
-        <div>缩放比例</div>
-        <div>
-          <el-input-number
-            v-model="backgroudScale"
-            size="small"
-            :precision="1"
-            :min="0.1"
-            :max="10"
-            controls-position="right"
-            @change="handleScaleChange"
-          />
-        </div>
-      </div>
-      <div class="output">
-        <div>导出分辨率</div>
-        <div>
-          <span>宽:</span><span>{{ controller.app.screen.width }}</span> x
-          <span>高:</span><span>{{ controller.app.screen.height }}</span>
-        </div>
-      </div>
-    </div>
-    <div v-else>未知</div> -->
   </div>
 </template>
 <style lang="scss" scoped>

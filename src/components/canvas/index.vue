@@ -5,18 +5,28 @@ export default {
 };
 </script>
 <script setup lang="ts">
-import { ref, reactive, defineExpose, onMounted } from "vue";
+import { ref, reactive, defineExpose, onMounted, inject } from "vue";
 import bus from "@/lib/bus";
 import controller from "./lib/controller";
 
 import mixin from "@/lib/mixin";
 import * as PIXI from "pixi.js";
+
+import nullSorite from "@/assets/null.png";
+
 const { mmToPx } = mixin();
-const app = new PIXI.Application({
-  backgroundAlpha: 0,
+const size = {
   width: mmToPx(210),
   height: mmToPx(297),
+};
+const app = new PIXI.Application({
+  backgroundAlpha: 0,
+  width: size.width,
+  height: size.height,
 });
+
+// 套打背图
+const background = inject<any>("background");
 
 app.stage.interactive = true;
 app.stage.sortableChildren = true;
@@ -35,23 +45,6 @@ const canvasController = reactive<any>({
   meter_zoom: 0, // 子元素缩放比例
 });
 
-const dragstart = (e: any) => {
-  canvasController.startclientX = e.clientX; // 记录拖拽元素初始位置
-  canvasController.startclientY = e.clientY;
-};
-const drag = (e: any) => {
-  // let x = e.clientX - canvasController.startclientX; // 计算偏移量
-  // let y = e.clientY - canvasController.startclientY;
-  // canvasController.elLeft = x; // 实现拖拽元素随偏移量移动
-  // canvasController.elTop = y;
-};
-const dragend = (e: any) => {
-  let x = e.clientX - canvasController.startclientX; // 计算偏移量
-  let y = e.clientY - canvasController.startclientY;
-  canvasController.elLeft += x; // 实现拖拽元素随偏移量移动
-  canvasController.elTop += y;
-};
-
 const wrapperRef = ref<any>(null);
 const canvasRef = ref<any>(null);
 
@@ -61,11 +54,11 @@ const initBodySize = function () {
   canvasController.initHeight = wrapperRef.value.clientHeight;
   canvasController.elWidth = canvasRef.value.clientWidth;
   canvasController.elHeight = canvasRef.value.clientHeight;
-  canvasController.meter_zoom = canvasController.elWidth / 100;
+  canvasController.meter_zoom = canvasController.elWidth / 1000;
   canvasController.elLeft = canvasController.initWidth / 2;
   canvasController.elTop = canvasController.initHeight / 2;
 
-  canvasController.zoom = 0.5
+  canvasController.zoom = 0.5;
 };
 
 const handleWeel = function (e: any) {
@@ -83,7 +76,7 @@ const handleWeel = function (e: any) {
     return;
   }
 
-  canvasController.meter_zoom = canvasController.elWidth / 100;
+  canvasController.meter_zoom = canvasController.elWidth / 1000;
   canvasController.elWidth = canvasRef.value.clientWidth;
   canvasController.elHeight = canvasRef.value.clientHeight;
 };
@@ -95,59 +88,55 @@ bus.on("onChangeBackground", () => {
   initBodySize();
   showHint.value = false;
 });
+
+function onDragStart(this: any, event: any) {
+  app.stage.on("pointermove", onDragMove);
+}
+
+function onDragEnd(this: any, event: any) {
+  app.stage.off("pointermove", onDragMove);
+}
+
+function onDragMove(this: any, event: any) {
+  canvasController.elLeft += event.data.originalEvent.movementX; // 实现拖拽元素随偏移量移动
+  canvasController.elTop += event.data.originalEvent.movementY;
+}
+
+// 初始化拖拽事件
+const initDragEvent = () => {
+  background.value.sprite.interactive = true;
+  background.value.sprite.on("pointerdown", onDragStart);
+  background.value.sprite.on("pointerup", onDragEnd);
+  background.value.sprite.on("pointerupoutside", onDragEnd);
+};
+
+bus.on("initDragEvent", () => {
+  initDragEvent();
+});
 onMounted(() => {
   document.getElementById("canvas")?.appendChild(app.view);
-  bus.emit("initByCanvas", controller(app));
+  const _controller = controller(app);
+  bus.emit("initByCanvas", _controller);
+
+  let bg = new Image();
+  bg.src = nullSorite;
+
+  const image = _controller.image();
+  image.apply(bg, {
+    x: size.width / 2,
+    y: size.height / 2,
+    width: size.width,
+    height: size.height,
+    zIndex: 0,
+  });
+  background.value = image;
 
   initBodySize();
+  initDragEvent();
 });
 </script>
 <template>
   <div class="canvas-Ref" ref="wrapperRef">
-    <el-icon
-      class="drag-controller"
-      style="top: 0; left: 0"
-      draggable="true"
-      color="#666"
-      size="24px"
-      @dragstart="dragstart($event)"
-      @drag="drag($event)"
-      @dragend="dragend($event)"
-      ><Rank
-    /></el-icon>
-    <el-icon
-      class="drag-controller"
-      style="right: 0; top: 0"
-      draggable="true"
-      color="#666"
-      size="24px"
-      @dragstart="dragstart($event)"
-      @drag="drag($event)"
-      @dragend="dragend($event)"
-      ><Rank
-    /></el-icon>
-    <el-icon
-      class="drag-controller"
-      style="right: 0; bottom: 0"
-      draggable="true"
-      color="#666"
-      size="24px"
-      @dragstart="dragstart($event)"
-      @drag="drag($event)"
-      @dragend="dragend($event)"
-      ><Rank
-    /></el-icon>
-    <el-icon
-      class="drag-controller"
-      style="left: 0; bottom: 0"
-      draggable="true"
-      color="#666"
-      size="24px"
-      @dragstart="dragstart($event)"
-      @drag="drag($event)"
-      @dragend="dragend($event)"
-      ><Rank
-    /></el-icon>
     <div class="hint" v-show="showHint">请先上传背图</div>
     <div
       id="canvas"

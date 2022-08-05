@@ -61,7 +61,12 @@ const applyStyle = () => {
 </script>
 <template>
   <div id="rightSide">
-    <el-button class="btn-apply" @click="applyStyle" v-if="currentElements.length !== 0">应用配置</el-button>
+    <el-button
+      class="btn-apply"
+      @click="applyStyle"
+      v-if="currentElements.length !== 0"
+      >应用配置</el-button
+    >
     <h2 class="title">当前元素</h2>
     <div class="setting-content">
       <div class="empty" v-if="currentElements.length == 0">请先选择元素</div>
@@ -92,13 +97,27 @@ const applyStyle = () => {
         <div class="current-element-option">
           <h3>配置项：</h3>
           <div>
-            <el-form-item label="使用字体">
-              <el-input v-model="currentElementStyle.fontFamily" />
-            </el-form-item>
             <el-form-item label="字体大小">
               <el-input-number
                 v-model="currentElementStyle.fontSize"
                 :min="1"
+                controls-position="right"
+              />
+            </el-form-item>
+            <el-form-item label="使用字体">
+              <el-select v-model="currentElementStyle.fontFamily">
+                <el-option label="宋体" value="宋体" />
+                <el-option label="黑体" value="黑体" />
+                <el-option label="微软雅黑" value="微软雅黑" />
+                <el-option label="仿宋" value="仿宋" />
+                <el-option label="楷体" value="楷体" />
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="本文边距">
+              <el-input-number
+                v-model="currentElementStyle.padding"
+                :min="0"
                 controls-position="right"
               />
             </el-form-item>
@@ -111,11 +130,11 @@ const applyStyle = () => {
             </el-form-item>
             <el-form-item label="行高标准">
               <el-select v-model="currentElementStyle.textBaseline">
-                <el-option label="alphabetic" value="alphabetic" />
-                <el-option label="底部" value="bottom" />
+                <el-option label="默认" value="alphabetic" />
+                <el-option label="偏高" value="bottom" />
                 <el-option label="中间" value="middle" />
-                <el-option label="顶部" value="top" />
-                <el-option label="hanging" value="hanging" />
+                <el-option label="偏低" value="top" />
+                <el-option label="置底" value="hanging" />
               </el-select>
             </el-form-item>
             <el-form-item label="文本行高">
@@ -204,20 +223,13 @@ const applyStyle = () => {
                 <el-option label="900" value="900" />
               </el-select>
             </el-form-item>
-            <el-form-item label="文字倾斜">
+            <!-- <el-form-item label="文字倾斜">
               <el-select v-model="currentElementStyle.fontStyle">
                 <el-option label="不倾斜" value="normal" />
                 <el-option label="字体倾斜" value="italic" />
                 <el-option label="强行倾斜" value="oblique" />
               </el-select>
-            </el-form-item>
-            <el-form-item label="本文边距">
-              <el-input-number
-                v-model="currentElementStyle.padding"
-                :min="0"
-                controls-position="right"
-              />
-            </el-form-item>
+            </el-form-item> -->
           </div>
         </div>
       </div>

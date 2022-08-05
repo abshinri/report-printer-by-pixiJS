@@ -173,42 +173,6 @@ const restore = () => {
     <certDataPanel style="margin-top: 10px" />
 
     <el-button @click="output" plain>导出结果</el-button>
-    <h3 style="margin-top: 10px">资源池</h3>
-    <el-table :data="elementPool" style="width: 100%" max-height="250">
-      <el-table-column prop="type" label="类型" />
-      <el-table-column prop="id" label="ID号" />
-    </el-table>
-
-    <!-- <div class="layers">
-      <div class="btns">
-        <el-button size="small" plain @click="clickAddImageBtn"
-          >添加图片</el-button
-        >
-        <el-input
-          v-model="pendingText"
-          :rows="2"
-          type="textarea"
-          placeholder="待添加的文本"
-        />
-        <el-input
-          v-model="pendingTextStyle"
-          :rows="8"
-          type="textarea"
-          placeholder="待添加的文本样式"
-        />
-
-        <el-button size="small" @click="addText" plain>添加文字</el-button>
-        <el-button size="small" plain type="danger">删除</el-button>
-        <input
-          type="file"
-          ref="imageInputRef"
-          accept="image/*"
-          @change="getFileToImage"
-          style="display: none"
-        />
-      </div>
-
-    </div> -->
   </div>
 </template>
 <style lang="scss" scoped>

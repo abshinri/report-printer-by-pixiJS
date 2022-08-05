@@ -25,7 +25,7 @@ export default class Image extends Element {
     });
   }
 
-  apply(url: string, option: any) {
+  apply(url: any, option: any) {
     this.id = "image-" + this.getRandomId();
 
     this.url = url;

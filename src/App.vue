@@ -20,6 +20,9 @@ const adjustPointsGroup = ref<any>({
   scaleY: 1,
 });
 provide("adjustPointsGroup", adjustPointsGroup);
+// 套打底图的数据
+const background = ref<any>({hadImage:false});
+provide("background", background);
 </script>
 
 <template>
