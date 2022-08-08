@@ -25,6 +25,9 @@ const app = new PIXI.Application({
   height: size.height,
 });
 
+// 待提交的数据和套打时拿到的数据
+const reportPrinterData = inject<any>("reportPrinterData");
+
 // 套打背图
 const background = inject<any>("background");
 
@@ -137,6 +140,15 @@ onMounted(() => {
 </script>
 <template>
   <div class="canvas-Ref" ref="wrapperRef">
+    <div class="pages">
+      <div v-for="(item, index) in reportPrinterData">
+        <div>{{ item.pageSetting.name }}</div>
+        <el-icon><Close /></el-icon>
+      </div>
+      <div class="add">
+        <el-icon><plus /></el-icon>
+      </div>
+    </div>
     <div class="hint" v-show="showHint">请先上传背图</div>
     <div
       id="canvas"
@@ -150,9 +162,39 @@ onMounted(() => {
     ></div>
   </div>
 </template>
-<style lang="scss">
+<style lang="scss" scoped>
 .canvas-Ref {
-  border: 2px solid #272d37;
+  border: 2px solid var(--color-theme-dark);
+
+  .pages {
+    position: absolute;
+    width: 100%;
+    height: 28px;
+    display: flex;
+    padding: 0 2px;
+    > div {
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      background-color: var(--color-theme-main);
+      padding: 0px 8px;
+      margin: 0 2px;
+      border-radius: 4px;
+
+      &:hover {
+        background-color: var(--color-theme-hover);
+      }
+      .el-icon {
+        margin-left: 4px;
+      }
+      &.add {
+        .el-icon {
+          margin-left: 0px;
+        }
+      }
+    }
+  }
   .drag-controller {
     position: absolute;
     cursor: move;
@@ -166,7 +208,7 @@ onMounted(() => {
   // display: flex;
   // justify-content: center;
   // align-items: center;
-  background: #272d37 url(../../assets/tile.png) 56px 56px !important;
+  background: var(--color-theme-dark) url(../../assets/tile.png) 56px 56px !important;
   .hint {
     position: absolute;
     z-index: 0;

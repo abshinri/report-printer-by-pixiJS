@@ -10,7 +10,7 @@ import mixin from "@/lib/mixin";
 import bus from "@/lib/bus";
 import certDataPanel from "./panels/certData.vue";
 // 矫正参数
-const adjustPointsGroup = inject<any>("adjustPointsGroup");
+const pageSetting = inject<any>("pageSetting");
 
 // 套打背图
 const background = inject<any>("background");

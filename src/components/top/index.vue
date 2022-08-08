@@ -18,7 +18,7 @@ import bus from "@/lib/bus";
 
 import { ElMessage } from "element-plus";
 // 矫正参数
-const adjustPointsGroup = inject<any>("adjustPointsGroup");
+const pageSetting = inject<any>("pageSetting");
 // 套打背图
 const background = inject<any>("background");
 // 画布控制器
@@ -126,18 +126,18 @@ const output = () => {
   //   });
   // });
   // if (
-  //   adjustPointsGroup.value.fixedPoints.a &&
-  //   adjustPointsGroup.value.fixedPoints.b
+  //   pageSetting.value.fixedPoints.a &&
+  //   pageSetting.value.fixedPoints.b
   // ) {
   // controller.value.app.stage.scale.x =
   //   controller.value.app.stage.scale.x / adjustParam.scaleX;
-  controller.value.app.stage.scale.x = adjustPointsGroup.value.scaleX;
-  controller.value.app.stage.scale.y = adjustPointsGroup.value.scaleY;
-  // controller.value.app.stage.x = -adjustPointsGroup.value.fixedPoints.a.x;
+  controller.value.app.stage.scale.x = pageSetting.value.scaleX;
+  controller.value.app.stage.scale.y = pageSetting.value.scaleY;
+  // controller.value.app.stage.x = -pageSetting.value.fixedPoints.a.x;
   // controller.value.app.stage.y = controller.value.app.stage.y - adjustParam.y;
-  // controller.value.app.stage.y = -adjustPointsGroup.value.fixedPoints.a.y;
-  controller.value.app.stage.x = -adjustPointsGroup.value.x;
-  controller.value.app.stage.y = -adjustPointsGroup.value.y;
+  // controller.value.app.stage.y = -pageSetting.value.fixedPoints.a.y;
+  controller.value.app.stage.x = -pageSetting.value.x;
+  controller.value.app.stage.y = -pageSetting.value.y;
 
   // }
 
@@ -213,38 +213,44 @@ const restore = () => {
     </div>
     <!-- 设置背图大小 -->
     <div class="background-size">
-      <div class="background-size-item">
-        <span>宽度</span>
-        <el-input
-          type="number"
-          v-model.number="reportSize.width"
-          @change="handleSizeChange"
-          size="small"
-        >
-          <template #append>mm</template></el-input
-        >
-      </div>
-      <div class="background-size-item">
-        <span>高度</span>
-        <el-input
-          type="number"
-          v-model.number="reportSize.height"
-          @change="handleSizeChange"
-          size="small"
-        >
-          <template #append>mm</template></el-input
-        >
+      <div class="title">画布大小</div>
+
+      <div class="setting">
+        <div class="background-size-item">
+          <span>宽:</span>
+          <el-input
+            type="number"
+            v-model.number="reportSize.width"
+            @change="handleSizeChange"
+            size="small"
+          >
+            <template #append>mm</template></el-input
+          >
+        </div>
+        <div class="background-size-item multiply">x</div>
+        <div class="background-size-item">
+          <span>高:</span>
+          <el-input
+            type="number"
+            v-model.number="reportSize.height"
+            @change="handleSizeChange"
+            size="small"
+          >
+            <template #append>mm</template></el-input
+          >
+        </div>
       </div>
     </div>
     <!-- 画布配置层 -->
-    <div class="background-setting">
+    <div class="background-setting setting-1">
+      <div class="title">画布偏移</div>
       <div class="setting">
         <div class="setting-item">
-          <div class="setting-item-title">X轴偏移:</div>
+          <span>X轴:</span>
           <div class="setting-item-content">
             <el-input-number
               size="small"
-              v-model="adjustPointsGroup.x"
+              v-model="pageSetting.x"
               :step="1"
               :precision="3"
               :value-on-clear="0"
@@ -253,11 +259,11 @@ const restore = () => {
           </div>
         </div>
         <div class="setting-item">
-          <div class="setting-item-title">Y轴偏移:</div>
+          <span>Y轴:</span>
           <div class="setting-item-content">
             <el-input-number
               size="small"
-              v-model="adjustPointsGroup.y"
+              v-model="pageSetting.y"
               :step="1"
               :precision="3"
               :value-on-clear="0"
@@ -265,12 +271,18 @@ const restore = () => {
             ></el-input-number>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="background-setting setting-2">
+      <div class="title">画布缩放</div>
+      <div class="setting">
         <div class="setting-item">
-          <div class="setting-item-title">X轴缩放:</div>
+          <span>X轴:</span>
           <div class="setting-item-content">
             <el-input-number
               size="small"
-              v-model="adjustPointsGroup.scaleX"
+              v-model="pageSetting.scaleX"
               :min="0.1"
               :max="2"
               :step="0.05"
@@ -281,11 +293,11 @@ const restore = () => {
           </div>
         </div>
         <div class="setting-item">
-          <div class="setting-item-title">Y轴缩放:</div>
+          <span>Y轴:</span>
           <div class="setting-item-content">
             <el-input-number
               size="small"
-              v-model="adjustPointsGroup.scaleY"
+              v-model="pageSetting.scaleY"
               :min="0.1"
               :max="2"
               :step="0.05"
@@ -298,15 +310,35 @@ const restore = () => {
       </div>
     </div>
     <div class="background-fixed">
-      <el-button @click="addAnchorPoint" plain>导入定位点</el-button>
-      <el-button @click="addFixedPoint" plain>导入矫正点</el-button>
-      <el-button @click="cleanFixedPoint" plain>清除矫正点</el-button>
+      <div class="title">矫正参考</div>
+      <div class="setting">
+        <div @click="addAnchorPoint" class="printer-btn">
+          <div>
+            <el-icon><Aim /></el-icon>
+            <div>定位点</div>
+          </div>
+        </div>
+
+        <div @click="addFixedPoint" class="printer-btn">
+          <div>
+            <el-icon><HelpFilled /></el-icon>
+            <div>矫正点</div>
+          </div>
+        </div>
+
+        <div @click="cleanFixedPoint" class="printer-btn">
+          <div>
+            <el-icon><Delete /></el-icon>
+            <div>清除</div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="export">
+    <div class="background-export">
       <div @click="output" class="exporter printer-btn">
         <div>
-          <el-icon><Picture /></el-icon>
           <div>导出结果</div>
+          <el-icon><Printer /></el-icon>
         </div>
       </div>
     </div>
@@ -321,20 +353,18 @@ const restore = () => {
 </template>
 <style lang="scss" scoped>
 #backgroundPanel {
+  color: var(--color-top-text);
   padding: 0px 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.5);
   display: flex;
-
+  justify-content: space-between;
   align-items: center;
-  .background-uploader {
-    width: 180px;
-  }
   .exporter,
   .uploader {
-    padding: 12px 20px;
+    padding: 6px 12px;
     .el-icon {
-      padding-right: 10px;
-      font-size: 40px;
+      padding: 0 5px;
+      font-size: 32px;
     }
     > div {
       display: flex;
@@ -343,22 +373,89 @@ const restore = () => {
     }
   }
 
-  .background-size {
-    width: 300px;
-    display: flex;
+  .background-size,
+  .background-setting,
+  .background-fixed {
+    justify-self: flex-start;
+    > .title {
+      width: 100%;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
 
+    .setting {
+      display: flex;
+      height: 40px;
+      align-items: center;
+      .el-input {
+        height: 24px;
+      }
+    }
+  }
+  .background-size {
+    width: 260px;
     .background-size-item {
+      &.multiply {
+        padding: 0;
+        text-align: center;
+        width: 20px;
+      }
       width: 120px;
+      display: flex;
+      justify-content: space-around;
+      span {
+        width: 30px;
+      }
       ::v-deep(.el-input-group__append) {
         padding: 0 10px;
       }
     }
   }
   .background-setting {
-    width: 500px;
+    width: 300px;
+    display: flex;
+    flex-wrap: wrap;
+    .setting {
+      .setting-item {
+        &:first-child {
+          padding-right: 5px;
+        }
+        &:last-child {
+          padding-left: 5px;
+        }
+        width: 150px;
+        display: flex;
+        justify-content: space-between;
+        > span {
+          width: 45px;
+        }
+        .setting-item-content {
+          width: 100%;
+          .el-input-number--small {
+            width: 100%;
+          }
+        }
+      }
+    }
   }
   .background-fixed {
-    width: 200px;
+    width: 250px;
+    .setting {
+      justify-content: space-between;
+      .printer-btn {
+        
+    .el-icon {
+      padding: 0 3px;
+      font-size: 15px;
+    }
+        > div {
+          display: flex;
+          justify-content: space-around;
+        }
+        font-size: 13px;
+        padding: 8px 14px;
+      }
+    }
   }
 }
 </style>

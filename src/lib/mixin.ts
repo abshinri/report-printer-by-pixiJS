@@ -12,7 +12,7 @@ export default function () {
   // 当前元素
   const currentElements = inject<any>("currentElements");
   // 矫正参数
-  const adjustPointsGroup = inject<any>("adjustPointsGroup");
+  const pageSetting = inject<any>("pageSetting");
   // 画布控制器
   const controller = ref<any>(null);
   // 初始化画布控制器
@@ -157,38 +157,38 @@ export default function () {
     controller.value.app.stage.off("pointermove", onDragAnchorMove);
 
     if (currentAnchor === "isAnchorA") {
-      if (selectedAnchor.x >= adjustPointsGroup.value.anchorPoints.b.x + gap) {
-        adjustPointsGroup.value.anchorPoints.b.x = selectedAnchor.x + gap;
+      if (selectedAnchor.x >= pageSetting.value.anchorPoints.b.x + gap) {
+        pageSetting.value.anchorPoints.b.x = selectedAnchor.x + gap;
       }
-      if (selectedAnchor.y >= adjustPointsGroup.value.anchorPoints.b.y + gap) {
-        adjustPointsGroup.value.anchorPoints.b.y = selectedAnchor.y + gap;
+      if (selectedAnchor.y >= pageSetting.value.anchorPoints.b.y + gap) {
+        pageSetting.value.anchorPoints.b.y = selectedAnchor.y + gap;
       }
     }
 
     if (currentAnchor === "isFixedA") {
-      if (selectedAnchor.x >= adjustPointsGroup.value.fixedPoints.b.x + gap) {
-        adjustPointsGroup.value.fixedPoints.b.x = selectedAnchor.x + gap;
+      if (selectedAnchor.x >= pageSetting.value.fixedPoints.b.x + gap) {
+        pageSetting.value.fixedPoints.b.x = selectedAnchor.x + gap;
       }
-      if (selectedAnchor.y >= adjustPointsGroup.value.fixedPoints.b.y + gap) {
-        adjustPointsGroup.value.fixedPoints.b.y = selectedAnchor.y + gap;
+      if (selectedAnchor.y >= pageSetting.value.fixedPoints.b.y + gap) {
+        pageSetting.value.fixedPoints.b.y = selectedAnchor.y + gap;
       }
     }
 
     if (currentAnchor === "isAnchorB") {
-      if (selectedAnchor.x <= adjustPointsGroup.value.anchorPoints.a.x + gap) {
-        selectedAnchor.x = adjustPointsGroup.value.anchorPoints.a.x + gap;
+      if (selectedAnchor.x <= pageSetting.value.anchorPoints.a.x + gap) {
+        selectedAnchor.x = pageSetting.value.anchorPoints.a.x + gap;
       }
-      if (selectedAnchor.y <= adjustPointsGroup.value.anchorPoints.a.y + gap) {
-        selectedAnchor.y = adjustPointsGroup.value.anchorPoints.a.y + gap;
+      if (selectedAnchor.y <= pageSetting.value.anchorPoints.a.y + gap) {
+        selectedAnchor.y = pageSetting.value.anchorPoints.a.y + gap;
       }
     }
 
     if (currentAnchor === "isFixedB") {
-      if (selectedAnchor.x <= adjustPointsGroup.value.fixedPoints.a.x + gap) {
-        selectedAnchor.x = adjustPointsGroup.value.fixedPoints.a.x + gap;
+      if (selectedAnchor.x <= pageSetting.value.fixedPoints.a.x + gap) {
+        selectedAnchor.x = pageSetting.value.fixedPoints.a.x + gap;
       }
-      if (selectedAnchor.y <= adjustPointsGroup.value.fixedPoints.a.y + gap) {
-        selectedAnchor.y = adjustPointsGroup.value.fixedPoints.a.y + gap;
+      if (selectedAnchor.y <= pageSetting.value.fixedPoints.a.y + gap) {
+        selectedAnchor.y = pageSetting.value.fixedPoints.a.y + gap;
       }
     }
 
@@ -230,18 +230,18 @@ export default function () {
   // 增加定位锚点
   const addAnchorPoint = () => {
     if (
-      adjustPointsGroup.value.anchorPoints.a != null &&
-      adjustPointsGroup.value.anchorPoints.b != null
+      pageSetting.value.anchorPoints.a != null &&
+      pageSetting.value.anchorPoints.b != null
     ) {
-      adjustPointsGroup.value.anchorPoints.a.x = 0;
-      adjustPointsGroup.value.anchorPoints.a.y = 0;
-      adjustPointsGroup.value.anchorPoints.b.x =
+      pageSetting.value.anchorPoints.a.x = 0;
+      pageSetting.value.anchorPoints.a.y = 0;
+      pageSetting.value.anchorPoints.b.x =
         controller.value.app.screen.width;
-      adjustPointsGroup.value.anchorPoints.b.y =
+      pageSetting.value.anchorPoints.b.y =
         controller.value.app.screen.height;
     } else {
-      adjustPointsGroup.value.anchorPoints.a = null;
-      adjustPointsGroup.value.anchorPoints.b = null;
+      pageSetting.value.anchorPoints.a = null;
+      pageSetting.value.anchorPoints.b = null;
 
       const anchorPoint_a = getAnchorPoint(0, 0, png_aim_red_a, "isAnchorA");
       controller.value.app.stage.addChild(anchorPoint_a);
@@ -252,48 +252,48 @@ export default function () {
         "isAnchorB"
       );
       controller.value.app.stage.addChild(anchorPoint_b);
-      adjustPointsGroup.value.anchorPoints.a = anchorPoint_a;
-      adjustPointsGroup.value.anchorPoints.b = anchorPoint_b;
+      pageSetting.value.anchorPoints.a = anchorPoint_a;
+      pageSetting.value.anchorPoints.b = anchorPoint_b;
     }
   };
   // 恢复定位点
   const restoreAnchorPoint = () => {
-    if (adjustPointsGroup.value.anchorPoints.a) {
+    if (pageSetting.value.anchorPoints.a) {
       controller.value.app.stage.addChild(
-        adjustPointsGroup.value.anchorPoints.a
+        pageSetting.value.anchorPoints.a
       );
     }
-    if (adjustPointsGroup.value.anchorPoints.b) {
+    if (pageSetting.value.anchorPoints.b) {
       controller.value.app.stage.addChild(
-        adjustPointsGroup.value.anchorPoints.b
+        pageSetting.value.anchorPoints.b
       );
     }
-    if (adjustPointsGroup.value.fixedPoints.a) {
+    if (pageSetting.value.fixedPoints.a) {
       controller.value.app.stage.addChild(
-        adjustPointsGroup.value.fixedPoints.a
+        pageSetting.value.fixedPoints.a
       );
     }
-    if (adjustPointsGroup.value.fixedPoints.b) {
+    if (pageSetting.value.fixedPoints.b) {
       controller.value.app.stage.addChild(
-        adjustPointsGroup.value.fixedPoints.b
+        pageSetting.value.fixedPoints.b
       );
     }
   };
   //  增加矫正锚点
   const addFixedPoint = () => {
     if (
-      adjustPointsGroup.value.fixedPoints.a != null &&
-      adjustPointsGroup.value.fixedPoints.b != null
+      pageSetting.value.fixedPoints.a != null &&
+      pageSetting.value.fixedPoints.b != null
     ) {
-      adjustPointsGroup.value.fixedPoints.a.x = 0;
-      adjustPointsGroup.value.fixedPoints.a.y = 0;
-      adjustPointsGroup.value.fixedPoints.b.x =
+      pageSetting.value.fixedPoints.a.x = 0;
+      pageSetting.value.fixedPoints.a.y = 0;
+      pageSetting.value.fixedPoints.b.x =
         controller.value.app.screen.width;
-      adjustPointsGroup.value.fixedPoints.b.y =
+      pageSetting.value.fixedPoints.b.y =
         controller.value.app.screen.height;
     } else {
-      adjustPointsGroup.value.fixedPoints.a = null;
-      adjustPointsGroup.value.fixedPoints.b = null;
+      pageSetting.value.fixedPoints.a = null;
+      pageSetting.value.fixedPoints.b = null;
 
       const fixedPoint_a = getAnchorPoint(0, 0, png_aim_green_a, "isFixedA");
       controller.value.app.stage.addChild(fixedPoint_a);
@@ -304,30 +304,30 @@ export default function () {
         "isFixedB"
       );
       controller.value.app.stage.addChild(fixedPoint_b);
-      adjustPointsGroup.value.fixedPoints.a = fixedPoint_a;
-      adjustPointsGroup.value.fixedPoints.b = fixedPoint_b;
+      pageSetting.value.fixedPoints.a = fixedPoint_a;
+      pageSetting.value.fixedPoints.b = fixedPoint_b;
     }
   };
 
   const cleanFixedPoint = () => {
     if (
-      adjustPointsGroup.value.anchorPoints.a != null &&
-      adjustPointsGroup.value.anchorPoints.b != null
+      pageSetting.value.anchorPoints.a != null &&
+      pageSetting.value.anchorPoints.b != null
     ) {
-      adjustPointsGroup.value.anchorPoints.a.destroy();
-      adjustPointsGroup.value.anchorPoints.a = null;
-      adjustPointsGroup.value.anchorPoints.b.destroy();
-      adjustPointsGroup.value.anchorPoints.b = null;
+      pageSetting.value.anchorPoints.a.destroy();
+      pageSetting.value.anchorPoints.a = null;
+      pageSetting.value.anchorPoints.b.destroy();
+      pageSetting.value.anchorPoints.b = null;
     }
 
     if (
-      adjustPointsGroup.value.fixedPoints.a != null &&
-      adjustPointsGroup.value.fixedPoints.b != null
+      pageSetting.value.fixedPoints.a != null &&
+      pageSetting.value.fixedPoints.b != null
     ) {
-      adjustPointsGroup.value.fixedPoints.a.destroy();
-      adjustPointsGroup.value.fixedPoints.a = null;
-      adjustPointsGroup.value.fixedPoints.b.destroy();
-      adjustPointsGroup.value.fixedPoints.b = null;
+      pageSetting.value.fixedPoints.a.destroy();
+      pageSetting.value.fixedPoints.a = null;
+      pageSetting.value.fixedPoints.b.destroy();
+      pageSetting.value.fixedPoints.b = null;
     }
   };
 
@@ -335,10 +335,10 @@ export default function () {
   const getAdjustParam = (removePoints: boolean = false) => {
     if (
       !(
-        adjustPointsGroup.value.anchorPoints.a &&
-        adjustPointsGroup.value.anchorPoints.b &&
-        adjustPointsGroup.value.fixedPoints.a &&
-        adjustPointsGroup.value.fixedPoints.b
+        pageSetting.value.anchorPoints.a &&
+        pageSetting.value.anchorPoints.b &&
+        pageSetting.value.fixedPoints.a &&
+        pageSetting.value.fixedPoints.b
       )
     ) {
       return {
@@ -351,55 +351,55 @@ export default function () {
       };
     }
     const rectOnCanvasWidth = Math.abs(
-      adjustPointsGroup.value.anchorPoints.a.x -
-        adjustPointsGroup.value.anchorPoints.b.x
+      pageSetting.value.anchorPoints.a.x -
+        pageSetting.value.anchorPoints.b.x
     );
     const rectOnCanvasHeight = Math.abs(
-      adjustPointsGroup.value.anchorPoints.a.y -
-        adjustPointsGroup.value.anchorPoints.b.y
+      pageSetting.value.anchorPoints.a.y -
+        pageSetting.value.anchorPoints.b.y
     );
     // const rectOnCanvasSize = rectOnCanvasWidth * rectOnCanvasHeight;
     const rectOnPrintWidth = Math.abs(
-      adjustPointsGroup.value.fixedPoints.a.x -
-        adjustPointsGroup.value.fixedPoints.b.x
+      pageSetting.value.fixedPoints.a.x -
+        pageSetting.value.fixedPoints.b.x
     );
     const rectOnPrintHeight = Math.abs(
-      adjustPointsGroup.value.fixedPoints.a.y -
-        adjustPointsGroup.value.fixedPoints.b.y
+      pageSetting.value.fixedPoints.a.y -
+        pageSetting.value.fixedPoints.b.y
     );
     // const rectOnPrintSize = rectOnPrintWidth * rectOnPrintHeight;
     const result = {
       x:
-        adjustPointsGroup.value.fixedPoints.a.x -
-        adjustPointsGroup.value.anchorPoints.a.x,
+        pageSetting.value.fixedPoints.a.x -
+        pageSetting.value.anchorPoints.a.x,
       y:
-        adjustPointsGroup.value.fixedPoints.a.y -
-        adjustPointsGroup.value.anchorPoints.a.y,
+        pageSetting.value.fixedPoints.a.y -
+        pageSetting.value.anchorPoints.a.y,
       scaleX: rectOnPrintWidth / rectOnCanvasWidth,
       scaleY: rectOnPrintHeight / rectOnCanvasHeight,
     };
-    adjustPointsGroup.value = {
-      ...adjustPointsGroup.value,
+    pageSetting.value = {
+      ...pageSetting.value,
       ...result,
     };
 
     // 清除锚点精灵图
     if (removePoints) {
       controller.value.app.stage.removeChild(
-        adjustPointsGroup.value.anchorPoints.a
+        pageSetting.value.anchorPoints.a
       );
       controller.value.app.stage.removeChild(
-        adjustPointsGroup.value.anchorPoints.b
+        pageSetting.value.anchorPoints.b
       );
       controller.value.app.stage.removeChild(
-        adjustPointsGroup.value.fixedPoints.a
+        pageSetting.value.fixedPoints.a
       );
       controller.value.app.stage.removeChild(
-        adjustPointsGroup.value.fixedPoints.b
+        pageSetting.value.fixedPoints.b
       );
     }
 
-    return adjustPointsGroup.value;
+    return pageSetting.value;
   };
   // #endregion
   return {

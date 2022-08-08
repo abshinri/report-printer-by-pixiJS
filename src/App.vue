@@ -4,22 +4,34 @@ import Canvas from "./components/canvas/index.vue";
 import LeftSide from "./components/leftSide/index.vue";
 import RightSide from "./components/rightSide/index.vue";
 import Top from "./components/top/index.vue";
+
+// 待提交的数据和套打时拿到的数据
+const reportPrinterData = ref<any>([
+  {
+    elementPool: [],
+    pageSetting: {
+      anchorPoints: { a: null, b: null }, // 仅前端自用
+      fixedPoints: { a: null, b: null }, // 仅前端自用
+      x: 0,
+      y: 0,
+      scaleX: 1,
+      scaleY: 1,
+      name: "新照面",
+      src: "",
+    },
+  },
+]);
+provide("reportPrinterData", reportPrinterData);
 // 初始化画布元素池,导入所有的证照数据
-const elementPool = ref<any>([]);
+const elementPool = ref<any>(reportPrinterData.value[0].elementPool);
 provide("elementPool", elementPool);
+
 // 当前的元素的配置,多个元素则为默认配置
 const currentElements = ref<any>([]);
 provide("currentElements", currentElements);
-// 报告打印矫正参数
-const adjustPointsGroup = ref<any>({
-  anchorPoints: { a: null, b: null },
-  fixedPoints: { a: null, b: null },
-  x: 0,
-  y: 0,
-  scaleX: 1,
-  scaleY: 1,
-});
-provide("adjustPointsGroup", adjustPointsGroup);
+// 当前照面参数,包含矫正值,底图地址,照面名
+const pageSetting = ref<any>(reportPrinterData.value[0].pageSetting);
+provide("pageSetting", pageSetting);
 // 套打底图的数据
 const background = ref<any>({ hadImage: false });
 provide("background", background);
@@ -40,9 +52,10 @@ provide("background", background);
 @import "./assets/base.css";
 .report-printer {
   .top {
-    background: #38404e;
+    background: var(--color-theme-main);
     width: 100vw;
-    height: 80px;
+    height: 70px;
+    font-size: 14px;
   }
   .content {
     user-select: none;
@@ -53,12 +66,12 @@ provide("background", background);
     justify-content: space-between;
     background: #ddd;
     > div {
-      background: #38404e;
+      background: var(--color-theme-main);
       height: 100%;
     }
     .left-side {
       height: 80px;
-      width: 500px;
+      width: 400px;
     }
     .canvas {
       flex: 1;

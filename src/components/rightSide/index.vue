@@ -65,21 +65,26 @@ const applyStyle = () => {
       class="btn-apply"
       @click="applyStyle"
       v-if="currentElements.length !== 0"
-      >应用配置</el-button
+      >应用到当前元素</el-button
     >
     <div class="setting-content">
-      <div class="empty" v-if="currentElements.length == 0">请先选择元素</div>
-      <div v-else class="current-element">
+      <div class="current-element">
         <div>当前选择元素:</div>
+        <div style="width: 100%;word-break:break-all;padding:6px 0">
+          <div class="empty" v-if="currentElements.length == 0">
+            请先选择元素
+          </div>
+          <span
+            v-else
+            class="current-element-name"
+            style="padding: 5px"
+            v-for="item in currentElements"
+          >
+            <span>{{ item.id }}</span>
+          </span>
+        </div>
 
-        <span
-          class="current-element-name"
-          style="padding: 5px"
-          v-for="item in currentElements"
-        >
-          <span>{{ item.id }}</span>
-        </span>
-        <div v-if="currentElements.length > 1">
+        <div v-if="currentElements.length > 1" style="color:#999;padding-bottom: 10px;">
           选择多个元素时将批量调整样式
         </div>
         <div
@@ -101,10 +106,14 @@ const applyStyle = () => {
                 v-model="currentElementStyle.fontSize"
                 :min="1"
                 controls-position="right"
+                :disabled="currentElements.length == 0"
               />
             </el-form-item>
             <el-form-item label="使用字体">
-              <el-select v-model="currentElementStyle.fontFamily">
+              <el-select
+                v-model="currentElementStyle.fontFamily"
+                :disabled="currentElements.length == 0"
+              >
                 <el-option label="宋体" value="宋体" />
                 <el-option label="黑体" value="黑体" />
                 <el-option label="微软雅黑" value="微软雅黑" />
@@ -118,6 +127,7 @@ const applyStyle = () => {
                 v-model="currentElementStyle.padding"
                 :min="0"
                 controls-position="right"
+                :disabled="currentElements.length == 0"
               />
             </el-form-item>
             <el-form-item label="文字间距">
@@ -125,10 +135,14 @@ const applyStyle = () => {
                 v-model="currentElementStyle.letterSpacing"
                 :min="0"
                 controls-position="right"
+                :disabled="currentElements.length == 0"
               />
             </el-form-item>
             <el-form-item label="行高标准">
-              <el-select v-model="currentElementStyle.textBaseline">
+              <el-select
+                v-model="currentElementStyle.textBaseline"
+                :disabled="currentElements.length == 0"
+              >
                 <el-option label="默认" value="alphabetic" />
                 <el-option label="偏高" value="bottom" />
                 <el-option label="中间" value="middle" />
@@ -141,6 +155,7 @@ const applyStyle = () => {
                 <el-input style="width: 150px" placeholder="默认" disabled />
                 <span style="margin-left: 12px">默认行高</span>
                 <el-switch
+                  :disabled="currentElements.length == 0"
                   :model-value="true"
                   style="margin-left: 12px"
                   class="mt-2"
@@ -155,9 +170,11 @@ const applyStyle = () => {
                   v-model="currentElementStyle.lineHeight"
                   :min="1"
                   controls-position="right"
+                  :disabled="currentElements.length == 0"
                 />
                 <span style="margin-left: 12px">默认行高</span>
                 <el-switch
+                  :disabled="currentElements.length == 0"
                   :model-value="false"
                   style="margin-left: 12px"
                   class="mt-2"
@@ -173,6 +190,7 @@ const applyStyle = () => {
                 v-model="currentElementStyle.leading"
                 :min="0"
                 controls-position="right"
+                :disabled="currentElements.length == 0"
               />
             </el-form-item>
             <el-form-item label="文本宽度">
@@ -180,7 +198,9 @@ const applyStyle = () => {
                 v-model="currentElementStyle.wordWrapWidth"
                 :min="1"
                 controls-position="right"
-                :disabled="!currentElementStyle.wordWrap"
+                :disabled="
+                  !currentElementStyle.wordWrap || currentElements.length == 0
+                "
               />
               <span style="margin-left: 12px">启用换行</span>
               <el-switch
@@ -190,23 +210,33 @@ const applyStyle = () => {
                 inline-prompt
                 :active-icon="Check"
                 :inactive-icon="Close"
+                :disabled="currentElements.length == 0"
               />
             </el-form-item>
             <el-form-item label="文字颜色">
-              <el-color-picker v-model="currentElementStyle.fill" />
+              <el-color-picker
+                v-model="currentElementStyle.fill"
+                :disabled="currentElements.length == 0"
+              />
               <span style="margin-left: 12px">{{
                 currentElementStyle.fill
               }}</span>
             </el-form-item>
             <el-form-item label="文本对齐">
-              <el-select v-model="currentElementStyle.align">
+              <el-select
+                v-model="currentElementStyle.align"
+                :disabled="currentElements.length == 0"
+              >
                 <el-option label="左对齐" value="left" />
                 <el-option label="居中" value="center" />
                 <el-option label="右对齐" value="right" />
               </el-select>
             </el-form-item>
             <el-form-item label="文本粗细">
-              <el-select v-model="currentElementStyle.fontWeight">
+              <el-select
+                v-model="currentElementStyle.fontWeight"
+                :disabled="currentElements.length == 0"
+              >
                 <el-option label="正常" value="normal" />
                 <el-option label="加粗" value="bold" />
                 <el-option label="更粗" value="bolder" />
@@ -251,22 +281,25 @@ const applyStyle = () => {
       display: none;
     }
   }
-}
-.btn-apply {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  z-index: 1;
-}
-.empty {
-  font-size: 32px;
-  text-align: center;
-  padding: 10px;
-  color: var(--el-color-info-light-5);
-  word-break: break-all;
-}
-.title {
-  padding-bottom: 5px;
-  margin-bottom: 10px;
+  .btn-apply {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 1;
+  }
+  .empty {
+    font-size: 32px;
+    text-align: center;
+    padding: 10px;
+    color: var(--el-color-info-light-2);
+    word-break: break-all;
+  }
+  .title {
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+  }
+  .el-form-item {
+    margin-bottom: 15px;
+  }
 }
 </style>

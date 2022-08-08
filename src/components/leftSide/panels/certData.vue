@@ -70,6 +70,121 @@ const certData = ref<any>([
     egName: "DEMO3",
     content: "qw1231_213123dasfffa+++U",
   },
+  {
+    name: "DEMO1",
+    egName: "DEMO1",
+    content: "18000000000",
+  },
+  {
+    name: "DEMO2",
+    egName: "DEMO2",
+    content: "1.2.QWEQWE624_001.001.U",
+  },
+  {
+    name: "DEMO3",
+    egName: "DEMO3",
+    content: "qw1231_213123dasfffa+++U",
+  },
+  {
+    name: "证照名称",
+    egName: "certName",
+    content: "测试BLAHBLAHBLAH目录",
+  },
+  {
+    name: "证照类型代码",
+    egName: "certCode",
+    content: "032123125123123124i",
+  },
+  {
+    name: "证照编号",
+    egName: "certNumber",
+    content: "34123_231",
+  },
+  {
+    name: "证照标识",
+    egName: "certSign",
+    content: "1.2.156.3005.2.062301.1101101102.0624_001.001.U",
+  },
+  {
+    name: "DEMO1",
+    egName: "DEMO1",
+    content: "18000000000",
+  },
+  {
+    name: "DEMO2",
+    egName: "DEMO2",
+    content: "1.2.QWEQWE624_001.001.U",
+  },
+  {
+    name: "DEMO3",
+    egName: "DEMO3",
+    content: "qw1231_213123dasfffa+++U",
+  },
+  {
+    name: "DEMO1",
+    egName: "DEMO1",
+    content: "18000000000",
+  },
+  {
+    name: "DEMO2",
+    egName: "DEMO2",
+    content: "1.2.QWEQWE624_001.001.U",
+  },
+  {
+    name: "DEMO3",
+    egName: "DEMO3",
+    content: "qw1231_213123dasfffa+++U",
+  },
+  {
+    name: "证照名称",
+    egName: "certName",
+    content: "测试BLAHBLAHBLAH目录",
+  },
+  {
+    name: "证照类型代码",
+    egName: "certCode",
+    content: "032123125123123124i",
+  },
+  {
+    name: "证照编号",
+    egName: "certNumber",
+    content: "34123_231",
+  },
+  {
+    name: "证照标识",
+    egName: "certSign",
+    content: "1.2.156.3005.2.062301.1101101102.0624_001.001.U",
+  },
+  {
+    name: "DEMO1",
+    egName: "DEMO1",
+    content: "18000000000",
+  },
+  {
+    name: "DEMO2",
+    egName: "DEMO2",
+    content: "1.2.QWEQWE624_001.001.U",
+  },
+  {
+    name: "DEMO3",
+    egName: "DEMO3",
+    content: "qw1231_213123dasfffa+++U",
+  },
+  {
+    name: "DEMO1",
+    egName: "DEMO1",
+    content: "18000000000",
+  },
+  {
+    name: "DEMO2",
+    egName: "DEMO2",
+    content: "1.2.QWEQWE624_001.001.U",
+  },
+  {
+    name: "DEMO3",
+    egName: "DEMO3",
+    content: "qw1231_213123dasfffa+++U",
+  },
 ]);
 
 // 初始化元素池,除了Sprite全部配置好
@@ -78,6 +193,9 @@ const initElementPool = () => {
     elementPool.value.push(
       controller.value.text().init(item.egName, {
         type: "text",
+        show: false,
+        x: 0,
+        y: 0,
         text: item.content || item.egName,
         ...item,
       })
@@ -155,12 +273,12 @@ bus.on("initByCanvas", (_controller) => {
       :data="elementPool"
       style="margin: 10px 0; width: 100%"
       size="small"
-      max-height="280"
+      :height="`calc(100vh - 200px)`"
       @selection-change="handleSelectionChange"
     >
-      <el-table-column type="selection" width="55" />
-      <el-table-column prop="name" label="字段名" width="80" />
-      <el-table-column prop="egName" label="英文名" width="80" />
+      <el-table-column type="selection" width="30" />
+      <el-table-column prop="name" label="字段名" />
+      <el-table-column prop="egName" label="英文名" />
       <el-table-column prop="content" label="内容预览" />
       <el-table-column label="操作" align="center">
         <template #default="{ row }">
@@ -179,7 +297,7 @@ bus.on("initByCanvas", (_controller) => {
               size="small"
               @click="onRemoveElement(row)"
               :disabled="row.sprite == null"
-              >删除</el-button
+              >隐藏</el-button
             >
           </div>
         </template>

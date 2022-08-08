@@ -47,6 +47,13 @@
 
   --color-heading: var(--vt-c-text-dark-1);
   --color-text: var(--vt-c-text-dark-2);
+
+  --color-top-text: #c4c4c4;
+
+  --color-theme-main: #38404e;
+  --color-theme-light: #4b5463;
+  --color-theme-dark: #272d37;
+  --color-theme-hover: #49505c;
 }
 /* } */
 
@@ -67,13 +74,13 @@ html.dark {
 }
 
 .printer-btn {
-  box-shadow: inset 0px 1px 0px 0px #5c6370;
-  background-color: #424a57;
+  box-shadow: inset 0px 1px 0px 0px #7a818f;
+  background-color: var(--color-theme-light);
   border-radius: 3px;
   border: 1px solid #36383d;
   display: inline-block;
   cursor: pointer;
-  color: #b3b4b6;
+  color: var(--color-top-text);
   font-family: Arial;
   font-size: 15px;
   padding: 12px 20px;
@@ -82,7 +89,7 @@ html.dark {
   line-height: 1em;
 }
 .printer-btn:hover {
-  background-color: #49505c;
+  background-color: var(--color-theme-hover);
 }
 .printer-btn:active {
   position: relative;
