@@ -17,13 +17,14 @@ import {
 
 import mixin from "@/lib/mixin";
 import bus from "@/lib/bus";
+import type { FormInstance, FormRules } from "element-plus";
 // 画布控制器
 const controller = ref<any>(null);
 // 元素池
 const elementPool = inject<any>("elementPool");
 // 当前选择的元素
 const currentElements = inject<any>("currentElements");
-
+const ruleFormRef = ref<FormInstance>();
 // 是否需要注意清空的状态
 let noClean = false;
 bus.on("updateCurrentElements", () => {
@@ -54,121 +55,6 @@ const certData = ref<any>([
     name: "证照标识",
     egName: "certSign",
     content: "1.2.156.3005.2.062301.1101101102.0624_001.001.U",
-  },
-  {
-    name: "DEMO1",
-    egName: "DEMO1",
-    content: "18000000000",
-  },
-  {
-    name: "DEMO2",
-    egName: "DEMO2",
-    content: "1.2.QWEQWE624_001.001.U",
-  },
-  {
-    name: "DEMO3",
-    egName: "DEMO3",
-    content: "qw1231_213123dasfffa+++U",
-  },
-  {
-    name: "DEMO1",
-    egName: "DEMO1",
-    content: "18000000000",
-  },
-  {
-    name: "DEMO2",
-    egName: "DEMO2",
-    content: "1.2.QWEQWE624_001.001.U",
-  },
-  {
-    name: "DEMO3",
-    egName: "DEMO3",
-    content: "qw1231_213123dasfffa+++U",
-  },
-  {
-    name: "证照名称",
-    egName: "certName",
-    content: "测试BLAHBLAHBLAH目录",
-  },
-  {
-    name: "证照类型代码",
-    egName: "certCode",
-    content: "032123125123123124i",
-  },
-  {
-    name: "证照编号",
-    egName: "certNumber",
-    content: "34123_231",
-  },
-  {
-    name: "证照标识",
-    egName: "certSign",
-    content: "1.2.156.3005.2.062301.1101101102.0624_001.001.U",
-  },
-  {
-    name: "DEMO1",
-    egName: "DEMO1",
-    content: "18000000000",
-  },
-  {
-    name: "DEMO2",
-    egName: "DEMO2",
-    content: "1.2.QWEQWE624_001.001.U",
-  },
-  {
-    name: "DEMO3",
-    egName: "DEMO3",
-    content: "qw1231_213123dasfffa+++U",
-  },
-  {
-    name: "DEMO1",
-    egName: "DEMO1",
-    content: "18000000000",
-  },
-  {
-    name: "DEMO2",
-    egName: "DEMO2",
-    content: "1.2.QWEQWE624_001.001.U",
-  },
-  {
-    name: "DEMO3",
-    egName: "DEMO3",
-    content: "qw1231_213123dasfffa+++U",
-  },
-  {
-    name: "证照名称",
-    egName: "certName",
-    content: "测试BLAHBLAHBLAH目录",
-  },
-  {
-    name: "证照类型代码",
-    egName: "certCode",
-    content: "032123125123123124i",
-  },
-  {
-    name: "证照编号",
-    egName: "certNumber",
-    content: "34123_231",
-  },
-  {
-    name: "证照标识",
-    egName: "certSign",
-    content: "1.2.156.3005.2.062301.1101101102.0624_001.001.U",
-  },
-  {
-    name: "DEMO1",
-    egName: "DEMO1",
-    content: "18000000000",
-  },
-  {
-    name: "DEMO2",
-    egName: "DEMO2",
-    content: "1.2.QWEQWE624_001.001.U",
-  },
-  {
-    name: "DEMO3",
-    egName: "DEMO3",
-    content: "qw1231_213123dasfffa+++U",
   },
   {
     name: "DEMO1",
@@ -255,6 +141,52 @@ const importSelected = () => {
   });
 };
 
+const dialogFormVisible = ref(false);
+const dialogForm = reactive<any>({
+  name: "",
+  egName: "",
+});
+const rules = reactive<any>({
+  name: [{ required: true, message: "请填写字段中文名" }],
+  egName: [
+    {
+      required: true,
+      message: "请填写字段英文名",
+    },
+  ],
+});
+
+// 新增字段
+const openAddDataModal = () => {
+  ruleFormRef.value?.resetFields();
+  dialogForm.name = "";
+  dialogForm.egName = "";
+  dialogFormVisible.value = true;
+};
+const addData = async () => {
+  if (!ruleFormRef.value) return;
+  await ruleFormRef.value.validate((valid, fields) => {
+    if (valid) {
+      elementPool.value.push(
+        controller.value.text().init(dialogForm.egName, {
+          type: "text",
+          show: false,
+          x: 0,
+          y: 0,
+          text: dialogForm.name,
+          ...{
+            name: dialogForm.name,
+            egName: dialogForm.egName,
+            content: dialogForm.name,
+          },
+        })
+      );
+
+      dialogFormVisible.value = false;
+    } else {
+    }
+  });
+};
 // 初始化画布控制器,初始化完成才执行下面的操作
 bus.on("initByCanvas", (_controller) => {
   controller.value = _controller;
@@ -264,16 +196,22 @@ bus.on("initByCanvas", (_controller) => {
 </script>
 <template>
   <div id="certDataPanel" class="certData-panel">
-    <h3>证照数据</h3>
-    <el-button link type="primary" size="small" @click="importSelected"
-      >导入选中数据</el-button
-    >
+    <div class="panel-title">证照数据</div>
+    <div class="btns">
+      <el-button link type="primary" size="small" @click="importSelected"
+        >导入选中数据</el-button
+      >
+      <div @click="openAddDataModal" class="add printer-btn">
+        <el-icon><Plus /></el-icon>
+        <div>增加字段</div>
+      </div>
+    </div>
     <el-table
       ref="tableRef"
       :data="elementPool"
       style="margin: 10px 0; width: 100%"
       size="small"
-      :height="`calc(100vh - 200px)`"
+      :height="`calc(100vh - 340px)`"
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="30" />
@@ -303,6 +241,32 @@ bus.on("initByCanvas", (_controller) => {
         </template>
       </el-table-column>
     </el-table>
+
+    <el-dialog
+      v-model="dialogFormVisible"
+      title="新增字段"
+      custom-class="report-printer-dialog"
+      width="400px"
+    >
+      <el-form ref="ruleFormRef" :rules="rules" :model="dialogForm">
+        <el-form-item label="字段中文名" prop="name">
+          <el-input v-model="dialogForm.name" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="字段英文名" prop="egName">
+          <el-input v-model="dialogForm.egName" autocomplete="off" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogFormVisible = false" style="margin: 0 5px"
+            >取消</el-button
+          >
+          <el-button type="primary" @click="addData" style="margin: 0 5px"
+            >新增</el-button
+          >
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 <style lang="scss" scoped>
@@ -319,6 +283,20 @@ bus.on("initByCanvas", (_controller) => {
   }
   ::v-deep(.el-button + .el-button) {
     margin-left: 0;
+  }
+  .btns {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .add {
+      padding: 0 10px;
+      height: 32px;
+      .el-icon {
+        padding: 0;
+        padding-right: 2px;
+        font-size: 15px;
+      }
+    }
   }
 }
 </style>

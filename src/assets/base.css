@@ -1,5 +1,12 @@
-/* color palette from <https://github.com/vuejs/theme> */
-:root {
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  position: relative;
+  font-weight: normal;
+}
+.report-printer {
   --vt-c-white: #ffffff;
   --vt-c-white-soft: #f8f8f8;
   --vt-c-white-mute: #f2f2f2;
@@ -21,23 +28,7 @@
   --vt-c-text-dark-2: rgb(235, 235, 235);
 }
 
-/* semantic color variables for this project */
-/* :root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
-
-  --color-border: var(--vt-c-divider-light-2);
-  --color-border-hover: var(--vt-c-divider-light-1);
-
-  --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
-
-  --section-gap: 160px;
-} */
-
-/* @media (prefers-color-scheme: dark) { */
-:root {
+.report-printer {
   --color-background: var(--vt-c-black);
   --color-background-soft: var(--vt-c-black-soft);
   --color-background-mute: var(--vt-c-black-mute);
@@ -55,25 +46,31 @@
   --color-theme-dark: #272d37;
   --color-theme-hover: #49505c;
 }
-/* } */
 
-html.dark {
+.report-printer {
+  --el-border-color: #1d2129;
+
   --el-fill-color-light: #272d37;
   --el-fill-color-blank: #272d37;
 }
-.el-table {
-  --el-table-header-bg-color: transparent;
+.report-printer-dialog {
+  --el-bg-color: #38404e;
+
+  --el-border-color: #1d2129;
 }
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  position: relative;
-  font-weight: normal;
+.report-printer-dialog .el-input__wrapper {
+  --el-input-bg-color: #272d37;
 }
 
-.printer-btn {
+.report-printer .el-table {
+  --el-table-header-bg-color: transparent;
+}
+
+.report-printer .el-divider--horizontal {
+  margin: 10px 0;
+}
+
+.report-printer .printer-btn {
   box-shadow: inset 0px 1px 0px 0px #7a818f;
   background-color: var(--color-theme-light);
   border-radius: 3px;
@@ -87,16 +84,28 @@ html.dark {
   text-decoration: none;
   text-shadow: 0px 1px 0px #303338;
   line-height: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
-.printer-btn:hover {
+.report-printer .printer-btn .el-icon {
+  padding: 0 5px;
+  font-size: 32px;
+}
+.report-printer .printer-btn:hover {
   background-color: var(--color-theme-hover);
 }
-.printer-btn:active {
+.report-printer .printer-btn:active {
   position: relative;
   top: 1px;
 }
+.report-printer .panel-title {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
 
-body {
+.report-printer {
   height: 100vh;
   overflow: hidden;
   color: var(--color-text);

@@ -30,58 +30,49 @@ const reportPrinterData = inject<any>("reportPrinterData");
 
 // 套打背图
 const background = inject<any>("background");
+// 鼠标指针信息
+const cursorInfo = inject<any>("cursorInfo");
 
 app.stage.interactive = true;
 app.stage.sortableChildren = true;
 
-const canvasController = reactive<any>({
-  initWidth: 0, // 父元素的宽-自适应值
-  initHeight: 0, // 父元素的高-自适应值
-  startclientX: 0, // 元素拖拽前距离浏览器的X轴位置
-  startclientY: 0, //元素拖拽前距离浏览器的Y轴位置
-  elLeft: 0, // 元素的左偏移量
-  elTop: 0, // 元素的右偏移量
-
-  zoom: 0.5, // 缩放比例
-  elWidth: 0, // 元素宽
-  elHeight: 0, // 元素高
-  meter_zoom: 0, // 子元素缩放比例
-});
+// 画布窗口控制器
+const canvasPanel = inject<any>("canvasPanel");
 
 const wrapperRef = ref<any>(null);
 const canvasRef = ref<any>(null);
 
 // 页面初始化
 const initBodySize = function () {
-  canvasController.initWidth = wrapperRef.value.clientWidth;
-  canvasController.initHeight = wrapperRef.value.clientHeight;
-  canvasController.elWidth = canvasRef.value.clientWidth;
-  canvasController.elHeight = canvasRef.value.clientHeight;
-  canvasController.meter_zoom = canvasController.elWidth / 1000;
-  canvasController.elLeft = canvasController.initWidth / 2;
-  canvasController.elTop = canvasController.initHeight / 2;
+  canvasPanel.initWidth = wrapperRef.value.clientWidth;
+  canvasPanel.initHeight = wrapperRef.value.clientHeight;
+  canvasPanel.elWidth = canvasRef.value.clientWidth;
+  canvasPanel.elHeight = canvasRef.value.clientHeight;
+  canvasPanel.meter_zoom = canvasPanel.elWidth / 1000;
+  canvasPanel.elLeft = canvasPanel.initWidth / 2;
+  canvasPanel.elTop = canvasPanel.initHeight / 2;
 
-  canvasController.zoom = 0.5;
+  canvasPanel.zoom = 0.5;
 };
 
 const handleWeel = function (e: any) {
   if (e.wheelDelta < 0) {
-    canvasController.zoom -= 0.1;
+    canvasPanel.zoom -= 0.1;
   } else {
-    canvasController.zoom += 0.1;
+    canvasPanel.zoom += 0.1;
   }
-  if (canvasController.zoom >= 3) {
-    canvasController.zoom = 3;
+  if (canvasPanel.zoom >= 3) {
+    canvasPanel.zoom = 3;
     return;
   }
-  if (canvasController.zoom <= 0.01) {
-    canvasController.zoom = 0.01;
+  if (canvasPanel.zoom <= 0.01) {
+    canvasPanel.zoom = 0.01;
     return;
   }
 
-  canvasController.meter_zoom = canvasController.elWidth / 1000;
-  canvasController.elWidth = canvasRef.value.clientWidth;
-  canvasController.elHeight = canvasRef.value.clientHeight;
+  canvasPanel.meter_zoom = canvasPanel.elWidth / 1000;
+  canvasPanel.elWidth = canvasRef.value.clientWidth;
+  canvasPanel.elHeight = canvasRef.value.clientHeight;
 };
 
 const showHint = ref(true);
@@ -101,16 +92,32 @@ function onDragEnd(this: any, event: any) {
 }
 
 function onDragMove(this: any, event: any) {
-  canvasController.elLeft += event.data.originalEvent.movementX; // 实现拖拽元素随偏移量移动
-  canvasController.elTop += event.data.originalEvent.movementY;
+  canvasPanel.elLeft += event.data.originalEvent.movementX; // 实现拖拽元素随偏移量移动
+  canvasPanel.elTop += event.data.originalEvent.movementY;
 }
 
+function onMouseStart(this: any, event: any) {
+  app.stage.on("pointermove", onMouseMove);
+}
+function onMouseEnd(this: any, event: any) {
+  app.stage.off("pointermove", onMouseMove);
+}
+function onMouseMove(this: any, event: any) {
+  cursorInfo.value.x = event.data.global.x;
+  cursorInfo.value.y = event.data.global.y;
+}
 // 初始化拖拽事件
 const initDragEvent = () => {
   background.value.sprite.interactive = true;
   background.value.sprite.on("pointerdown", onDragStart);
   background.value.sprite.on("pointerup", onDragEnd);
   background.value.sprite.on("pointerupoutside", onDragEnd);
+  app.stage.on("pointerover", onMouseStart);
+  app.stage.on("pointerout", onMouseEnd);
+
+  // app.stage.on("pointermove", (e: any) => {
+  //   console.log(e.screen.x);
+  // });
 };
 
 bus.on("initDragEvent", () => {
@@ -155,9 +162,9 @@ onMounted(() => {
       ref="canvasRef"
       @wheel="handleWeel"
       :style="{
-        left: `${canvasController.elLeft}px`,
-        top: `${canvasController.elTop}px`,
-        transform: `translate(-50%, -50%) scale(${canvasController.zoom})`,
+        left: `${canvasPanel.elLeft}px`,
+        top: `${canvasPanel.elTop}px`,
+        transform: `translate(-50%, -50%) scale(${canvasPanel.zoom})`,
       }"
     ></div>
   </div>
@@ -167,7 +174,9 @@ onMounted(() => {
   border: 2px solid var(--color-theme-dark);
 
   .pages {
+    top: 3px;
     position: absolute;
+    z-index: 2;
     width: 100%;
     height: 28px;
     display: flex;
@@ -181,7 +190,7 @@ onMounted(() => {
       padding: 0px 8px;
       margin: 0 2px;
       border-radius: 4px;
-
+      box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.3);
       &:hover {
         background-color: var(--color-theme-hover);
       }
@@ -224,9 +233,11 @@ onMounted(() => {
   }
   #canvas {
     position: absolute;
+    z-index: 1;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    padding: 10px 10px 5px;
     .drag-controller {
       cursor: move;
       position: absolute;

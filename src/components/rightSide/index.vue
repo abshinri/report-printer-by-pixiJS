@@ -69,8 +69,8 @@ const applyStyle = () => {
     >
     <div class="setting-content">
       <div class="current-element">
-        <div>当前选择元素:</div>
-        <div style="width: 100%;word-break:break-all;padding:6px 0">
+        <div class="panel-title">当前选择元素:</div>
+        <div style="width: 100%; word-break: break-all; padding: 6px 0">
           <div class="empty" v-if="currentElements.length == 0">
             请先选择元素
           </div>
@@ -84,7 +84,10 @@ const applyStyle = () => {
           </span>
         </div>
 
-        <div v-if="currentElements.length > 1" style="color:#999;padding-bottom: 10px;">
+        <div
+          v-if="currentElements.length > 1"
+          style="color: #999; padding-bottom: 10px"
+        >
           选择多个元素时将批量调整样式
         </div>
         <div
@@ -98,8 +101,10 @@ const applyStyle = () => {
             placeholder="当前字段对应内容"
           />
         </div>
+        
+    <el-divider />
         <div class="current-element-option">
-          <h3>配置项：</h3>
+          <div class="panel-title">配置项：</div>
           <div>
             <el-form-item label="字体大小">
               <el-input-number
@@ -288,10 +293,10 @@ const applyStyle = () => {
     z-index: 1;
   }
   .empty {
-    font-size: 32px;
+    font-size: 28px;
     text-align: center;
     padding: 10px;
-    color: var(--el-color-info-light-2);
+    color: var(--el-color-info-light-3);
     word-break: break-all;
   }
   .title {

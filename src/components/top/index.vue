@@ -198,262 +198,292 @@ const restore = () => {
 </script>
 <template>
   <div id="backgroundPanel" class="background-panel">
-    <!-- 上传 -->
-    <div class="background-uploader">
-      <div @click="clickAddBackgroundBtn" class="uploader printer-btn">
-        <div v-if="!isUploaded">
-          <el-icon><Picture /></el-icon>
-          <div>上传底图</div>
-        </div>
-        <div v-else>
-          <el-icon><Refresh /></el-icon>
-          <div>更换底图</div>
+    <!-- 返回 -->
+    <div class="back">
+      <el-icon><ArrowLeftBold /></el-icon>
+      <div>返回</div>
+    </div>
+    <div class="controller">
+      <!-- 上传 -->
+      <div class="background-uploader">
+        <div @click="clickAddBackgroundBtn" class="uploader printer-btn">
+          <div v-if="!isUploaded">
+            <el-icon><Picture /></el-icon>
+            <div>上传底图</div>
+          </div>
+          <div v-else>
+            <el-icon><Refresh /></el-icon>
+            <div>更换底图</div>
+          </div>
         </div>
       </div>
-    </div>
-    <!-- 设置背图大小 -->
-    <div class="background-size">
-      <div class="title">画布大小</div>
+      <!-- 设置背图大小 -->
+      <div class="background-size">
+        <div class="title">画布大小</div>
 
-      <div class="setting">
-        <div class="background-size-item">
-          <span>宽:</span>
-          <el-input
-            type="number"
-            v-model.number="reportSize.width"
-            @change="handleSizeChange"
-            size="small"
-          >
-            <template #append>mm</template></el-input
-          >
-        </div>
-        <div class="background-size-item multiply">x</div>
-        <div class="background-size-item">
-          <span>高:</span>
-          <el-input
-            type="number"
-            v-model.number="reportSize.height"
-            @change="handleSizeChange"
-            size="small"
-          >
-            <template #append>mm</template></el-input
-          >
-        </div>
-      </div>
-    </div>
-    <!-- 画布配置层 -->
-    <div class="background-setting setting-1">
-      <div class="title">画布偏移</div>
-      <div class="setting">
-        <div class="setting-item">
-          <span>X轴:</span>
-          <div class="setting-item-content">
-            <el-input-number
+        <div class="setting">
+          <div class="background-size-item">
+            <span>宽:</span>
+            <el-input
+              type="number"
+              v-model.number="reportSize.width"
+              @change="handleSizeChange"
               size="small"
-              v-model="pageSetting.x"
-              :step="1"
-              :precision="3"
-              :value-on-clear="0"
-              controls-position=""
-            ></el-input-number>
+            >
+              <template #append>mm</template></el-input
+            >
           </div>
-        </div>
-        <div class="setting-item">
-          <span>Y轴:</span>
-          <div class="setting-item-content">
-            <el-input-number
+          <div class="background-size-item multiply">x</div>
+          <div class="background-size-item">
+            <span>高:</span>
+            <el-input
+              type="number"
+              v-model.number="reportSize.height"
+              @change="handleSizeChange"
               size="small"
-              v-model="pageSetting.y"
-              :step="1"
-              :precision="3"
-              :value-on-clear="0"
-              controls-position=""
-            ></el-input-number>
+            >
+              <template #append>mm</template></el-input
+            >
           </div>
         </div>
       </div>
-    </div>
+      <!-- 画布配置层 -->
+      <div class="background-setting setting-1">
+        <div class="title">画布偏移</div>
+        <div class="setting">
+          <div class="setting-item">
+            <span>X轴:</span>
+            <div class="setting-item-content">
+              <el-input-number
+                size="small"
+                v-model="pageSetting.x"
+                :step="1"
+                :precision="3"
+                :value-on-clear="0"
+                controls-position=""
+              ></el-input-number>
+            </div>
+          </div>
+          <div class="setting-item">
+            <span>Y轴:</span>
+            <div class="setting-item-content">
+              <el-input-number
+                size="small"
+                v-model="pageSetting.y"
+                :step="1"
+                :precision="3"
+                :value-on-clear="0"
+                controls-position=""
+              ></el-input-number>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <div class="background-setting setting-2">
-      <div class="title">画布缩放</div>
-      <div class="setting">
-        <div class="setting-item">
-          <span>X轴:</span>
-          <div class="setting-item-content">
-            <el-input-number
-              size="small"
-              v-model="pageSetting.scaleX"
-              :min="0.1"
-              :max="2"
-              :step="0.05"
-              :precision="3"
-              :value-on-clear="1"
-              controls-position=""
-            ></el-input-number>
+      <div class="background-setting setting-2">
+        <div class="title">画布缩放</div>
+        <div class="setting">
+          <div class="setting-item">
+            <span>X轴:</span>
+            <div class="setting-item-content">
+              <el-input-number
+                size="small"
+                v-model="pageSetting.scaleX"
+                :min="0.1"
+                :max="2"
+                :step="0.05"
+                :precision="3"
+                :value-on-clear="1"
+                controls-position=""
+              ></el-input-number>
+            </div>
           </div>
-        </div>
-        <div class="setting-item">
-          <span>Y轴:</span>
-          <div class="setting-item-content">
-            <el-input-number
-              size="small"
-              v-model="pageSetting.scaleY"
-              :min="0.1"
-              :max="2"
-              :step="0.05"
-              :precision="3"
-              :value-on-clear="1"
-              controls-position=""
-            ></el-input-number>
+          <div class="setting-item">
+            <span>Y轴:</span>
+            <div class="setting-item-content">
+              <el-input-number
+                size="small"
+                v-model="pageSetting.scaleY"
+                :min="0.1"
+                :max="2"
+                :step="0.05"
+                :precision="3"
+                :value-on-clear="1"
+                controls-position=""
+              ></el-input-number>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="background-fixed">
-      <div class="title">矫正参考</div>
-      <div class="setting">
-        <div @click="addAnchorPoint" class="printer-btn">
+      <div class="background-fixed">
+        <div class="title">矫正参考</div>
+        <div class="setting">
+          <div @click="addAnchorPoint" class="printer-btn">
+            <div>
+              <el-icon><Aim /></el-icon>
+              <div>定位点</div>
+            </div>
+          </div>
+
+          <div @click="addFixedPoint" class="printer-btn">
+            <div>
+              <el-icon><HelpFilled /></el-icon>
+              <div>矫正点</div>
+            </div>
+          </div>
+
+          <div @click="cleanFixedPoint" class="printer-btn">
+            <div>
+              <el-icon><Delete /></el-icon>
+              <div>清除</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="background-export">
+        <div @click="output" class="exporter printer-btn">
           <div>
-            <el-icon><Aim /></el-icon>
-            <div>定位点</div>
-          </div>
-        </div>
-
-        <div @click="addFixedPoint" class="printer-btn">
-          <div>
-            <el-icon><HelpFilled /></el-icon>
-            <div>矫正点</div>
-          </div>
-        </div>
-
-        <div @click="cleanFixedPoint" class="printer-btn">
-          <div>
-            <el-icon><Delete /></el-icon>
-            <div>清除</div>
+            <div>导出结果</div>
+            <el-icon><Printer /></el-icon>
           </div>
         </div>
       </div>
+      <input
+        type="file"
+        ref="backgroudInputRef"
+        accept="image/*"
+        @change="getFileToBackground"
+        style="display: none"
+      />
     </div>
-    <div class="background-export">
-      <div @click="output" class="exporter printer-btn">
-        <div>
-          <div>导出结果</div>
-          <el-icon><Printer /></el-icon>
-        </div>
-      </div>
-    </div>
-    <input
-      type="file"
-      ref="backgroudInputRef"
-      accept="image/*"
-      @change="getFileToBackground"
-      style="display: none"
-    />
   </div>
 </template>
 <style lang="scss" scoped>
 #backgroundPanel {
-  color: var(--color-top-text);
-  padding: 0px 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  .exporter,
-  .uploader {
-    padding: 6px 12px;
-    .el-icon {
-      padding: 0 5px;
-      font-size: 32px;
-    }
-    > div {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-    }
-  }
 
-  .background-size,
-  .background-setting,
-  .background-fixed {
-    justify-self: flex-start;
-    > .title {
-      width: 100%;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-
-    .setting {
-      display: flex;
-      height: 40px;
-      align-items: center;
-      .el-input {
-        height: 24px;
-      }
-    }
-  }
-  .background-size {
-    width: 260px;
-    .background-size-item {
-      &.multiply {
-        padding: 0;
-        text-align: center;
-        width: 20px;
-      }
-      width: 120px;
-      display: flex;
-      justify-content: space-around;
-      span {
-        width: 30px;
-      }
-      ::v-deep(.el-input-group__append) {
-        padding: 0 10px;
-      }
-    }
-  }
-  .background-setting {
-    width: 300px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  .back {
+    width: 80px;
+    color: var(--el-color-info-dark-2);
     display: flex;
-    flex-wrap: wrap;
-    .setting {
-      .setting-item {
-        &:first-child {
-          padding-right: 5px;
-        }
-        &:last-child {
-          padding-left: 5px;
-        }
-        width: 150px;
+    align-items: center;
+    .el-icon {
+      font-size: 24px;
+    }
+   padding-left: 4px;
+   padding-right: 12px;
+    cursor: pointer;
+    &:hover {
+      color: var(--color-text);
+      background: var(--color-theme-hover);
+    }
+    height: 100%;
+    border-right: 1px solid var(--el-border-color);
+  }
+  .controller {
+    width: 100%;
+    color: var(--color-top-text);
+    padding: 0px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .exporter,
+    .uploader {
+      padding: 6px 12px;
+      .el-icon {
+        padding: 0 5px;
+        font-size: 32px;
+      }
+      > div {
         display: flex;
-        justify-content: space-between;
-        > span {
-          width: 45px;
+        justify-content: space-around;
+        align-items: center;
+      }
+    }
+    .background-size,
+    .background-setting,
+    .background-fixed {
+      justify-self: flex-start;
+      > .title {
+        width: 100%;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .setting {
+        display: flex;
+        height: 40px;
+        align-items: center;
+        .el-input {
+          height: 24px;
         }
-        .setting-item-content {
-          width: 100%;
-          .el-input-number--small {
+      }
+    }
+    .background-size {
+      width: 260px;
+      .background-size-item {
+        &.multiply {
+          padding: 0;
+          text-align: center;
+          width: 20px;
+        }
+        width: 120px;
+        display: flex;
+        justify-content: space-around;
+        span {
+          width: 30px;
+        }
+        ::v-deep(.el-input-group__append) {
+          padding: 0 10px;
+        }
+      }
+    }
+    .background-setting {
+      width: 300px;
+      display: flex;
+      flex-wrap: wrap;
+      .setting {
+        .setting-item {
+          &:first-child {
+            padding-right: 5px;
+          }
+          &:last-child {
+            padding-left: 5px;
+          }
+          width: 150px;
+          display: flex;
+          justify-content: space-between;
+          > span {
+            width: 45px;
+          }
+          .setting-item-content {
             width: 100%;
+            .el-input-number--small {
+              width: 100%;
+            }
           }
         }
       }
     }
-  }
-  .background-fixed {
-    width: 250px;
-    .setting {
-      justify-content: space-between;
-      .printer-btn {
-        
-    .el-icon {
-      padding: 0 3px;
-      font-size: 15px;
-    }
-        > div {
-          display: flex;
-          justify-content: space-around;
+    .background-fixed {
+      width: 250px;
+      .setting {
+        justify-content: space-between;
+        .printer-btn {
+          .el-icon {
+            padding: 0 3px;
+            font-size: 15px;
+          }
+          > div {
+            display: flex;
+            justify-content: space-around;
+          }
+          font-size: 13px;
+          padding: 8px 14px;
         }
-        font-size: 13px;
-        padding: 8px 14px;
       }
     }
   }
